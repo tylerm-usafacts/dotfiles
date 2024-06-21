@@ -1,0 +1,8 @@
+gh
+lazygit
+lua-language-server
+neovim
+node
+ripgrep
+starship
+tree
