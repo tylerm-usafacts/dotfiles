@@ -5,4 +5,5 @@ neovim
 node
 ripgrep
 starship
+stow
 tree
