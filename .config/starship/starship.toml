@@ -9,12 +9,12 @@ $directory\
 [](fg:lavender bg:mauve)\
 $git_branch\
 $git_status\
-[](fg:mauve bg:red)\
+[](fg:mauve bg:pink)\
 $nodejs\
 $python\
-[](fg:red bg:pink)\
+[](fg:pink bg:red)\
 $docker_context\
-[](fg:pink bg:rosewater)\
+[](fg:red bg:rosewater)\
 $time\
 [ ](fg:rosewater)\
 $line_break$character
@@ -58,7 +58,7 @@ truncation_symbol = "…/"
 
 [docker_context]
 symbol = " "
-style = "bg:pink fg:surface0"
+style = "bg:red fg:surface0"
 format = '[ $symbol $context ]($style)'
 
 [git_branch]
@@ -72,12 +72,12 @@ format = '[$all_status$ahead_behind ]($style)'
 
 [nodejs]
 symbol = ""
-style = "bg:red fg:surface0"
+style = "bg:pink fg:surface0"
 format = '[ $symbol ($version) ]($style)'
 
 [python]
 symbol = ""
-style = "bg:red fg:surface0"
+style = "bg:pink fg:surface0"
 format = '[ $symbol( $version) ]($style)'
 
 [time]
