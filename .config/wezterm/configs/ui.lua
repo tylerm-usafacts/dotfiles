@@ -6,6 +6,7 @@ function module.apply_to_config(config)
   config.color_scheme = 'Catppuccin Macchiato'
   config.window_background_opacity = 0.8
   config.macos_window_background_blur = 30
+  config.use_fancy_tab_bar = false
   -- mouse bindings
   config.keys = {
     {

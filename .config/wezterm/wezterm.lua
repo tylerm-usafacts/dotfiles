@@ -3,8 +3,6 @@ local ui = require 'configs.ui'
 local config = {}
 local wezterm = require 'wezterm'
 
-ui.apply_to_config(config)
-
 local process_icons = {
   ['docker'] = wezterm.nerdfonts.linux_docker,
   ['docker-compose'] = wezterm.nerdfonts.linux_docker,
@@ -70,7 +68,7 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
 
   if has_unseen_output then
     return {
-      { Foreground = { Color = '#28719c' } },
+      { Foreground = { Color = '#181825' } },
       { Text = title },
     }
   end
@@ -79,5 +77,7 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
     { Text = title },
   }
 end)
+
+ui.apply_to_config(config)
 
 return config
