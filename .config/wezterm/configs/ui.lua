@@ -7,6 +7,7 @@ function module.apply_to_config(config)
   config.window_background_opacity = 0.8
   config.macos_window_background_blur = 30
   config.use_fancy_tab_bar = false
+  config.tab_max_width = 100
   -- mouse bindings
   config.keys = {
     {
