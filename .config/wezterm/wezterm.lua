@@ -1,4 +1,5 @@
 local ui = require 'configs.ui'
+local mux = require 'configs.mux'
 
 local config = {}
 local wezterm = require 'wezterm'
@@ -80,5 +81,6 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
 end)
 
 ui.apply_to_config(config)
+mux.apply_to_config(config)
 
 return config
