@@ -66,4 +66,4 @@ vim.opt.hlsearch = true
 vim.opt.termguicolors = true
 
 -- Set conceallevel to 1
-vim.opt.conceallevel = 1
+vim.opt.conceallevel = 2
