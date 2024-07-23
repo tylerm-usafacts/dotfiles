@@ -62,12 +62,12 @@ return {
           -- The 'level' is used to index into the array using a clamp
           -- Highlight for the heading icon and extends through the entire line
           backgrounds = {
-            'RenderMarkdownH1Bg',
-            'RenderMarkdownH2Bg',
-            'RenderMarkdownH3Bg',
-            'RenderMarkdownH4Bg',
-            'RenderMarkdownH5Bg',
-            'RenderMarkdownH6Bg',
+            -- 'RenderMarkdownH1Bg',
+            -- 'RenderMarkdownH2Bg',
+            -- 'RenderMarkdownH3Bg',
+            -- 'RenderMarkdownH4Bg',
+            -- 'RenderMarkdownH5Bg',
+            -- 'RenderMarkdownH6Bg',
           },
           -- The 'level' is used to index into the array using a clamp
           -- Highlight for the heading and sign icons
@@ -92,7 +92,7 @@ return {
           --  full: normal + language
           style = 'full',
           -- Amount of padding to add to the left of code blocks
-          left_pad = 0,
+          left_pad = 2,
           -- Determins how the top / bottom of code block are rendered:
           --  thick: use the same highlight as the code body
           --  thin: when lines are empty overlay the above & below icons
