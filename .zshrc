@@ -1,4 +1,3 @@
-# custom scripts
 export PATH=~/.local/bin:$PATH
 
 # starship
@@ -14,4 +13,4 @@ eval "$(pyenv virtualenv-init -)"
 # aliases
 alias chex="chmod -R 755 ~/.local/bin/"
 alias lg="lazygit"
-alias srcz="source ~/.zshrc"
+alias zrc="source ~/.zshrc"
