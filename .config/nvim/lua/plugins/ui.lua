@@ -20,9 +20,12 @@ return {
           },
         },
         filtered_items = {
-          visible = true,
+          visible = true, -- if set to true, will still show hidden items
           hide_dotfiles = false,
           hide_gitignored = true,
+          hide_by_name = {
+            '.git',
+          },
         },
       },
     },
