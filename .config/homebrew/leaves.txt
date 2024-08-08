@@ -1,9 +1,16 @@
+fzf
+gcc
 gh
 lazygit
 lua-language-server
+make
 neovim
 node
+pyenv-virtualenv
 ripgrep
 starship
 stow
 tree
+unzip
+xclip
+zoxide
