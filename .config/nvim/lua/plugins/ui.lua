@@ -92,13 +92,13 @@ return {
         { '<leader>s', group = '[S]earch' },
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk' },
+        { '<leader>g', group = '[G]it' },
         { '<leader>l', group = '[L]azyGit' },
       }
 
       -- visual mode
       require('which-key').add {
-        { '<leader>h', group = 'Git [H]unk' },
+        { '<leader>g', group = '[G]it' },
         { mode = 'v' },
       }
     end,

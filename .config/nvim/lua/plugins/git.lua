@@ -16,7 +16,7 @@ return {
     -- setting the keybinding for LazyGit with 'keys' is recommended in
     -- order to load the plugin when the command is run for the first time
     keys = {
-      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'Open Lazy[G]it' },
+      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'Open [L]azy[G]it' },
     },
   },
   -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -58,27 +58,27 @@ return {
 
         -- Actions
         -- visual mode
-        map('v', '<leader>hs', function()
+        map('v', '<leader>gsh', function()
           gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'stage git hunk' })
-        map('v', '<leader>hr', function()
+        end, { desc = '[g]it [s]tage [h]unk' })
+        map('v', '<leader>grh', function()
           gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'reset git hunk' })
+        end, { desc = '[g]it [r]eset [h]unk' })
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
-        map('n', '<leader>hD', function()
+        map('n', '<leader>gsh', gitsigns.stage_hunk, { desc = '[g]it [s]tage [h]unk' })
+        map('n', '<leader>grh', gitsigns.reset_hunk, { desc = '[g]it [r]eset [h]unk' })
+        map('n', '<leader>gsb', gitsigns.stage_buffer, { desc = '[g]it [s]tage [b]uffer' })
+        map('n', '<leader>guh', gitsigns.undo_stage_hunk, { desc = '[g]it [u]ndo stage [h]unk' })
+        map('n', '<leader>grb', gitsigns.reset_buffer, { desc = '[g]it [r]eset [b]uffer' })
+        map('n', '<leader>gph', gitsigns.preview_hunk, { desc = '[g]it [p]review [h]unk' })
+        map('n', '<leader>gbl', gitsigns.blame_line, { desc = '[g]it [b]lame [l]ine' })
+        map('n', '<leader>gdi', gitsigns.diffthis, { desc = '[g]it [d]iff against [i]ndex' })
+        map('n', '<leader>gdc', function()
           gitsigns.diffthis '@'
-        end, { desc = 'git [D]iff against last commit' })
+        end, { desc = '[g]it [d]iff against last [c]ommit' })
         -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
+        map('n', '<leader>tgb', gitsigns.toggle_current_line_blame, { desc = '[t]oggle [g]it show [b]lame line' })
+        map('n', '<leader>tgd', gitsigns.toggle_deleted, { desc = '[t]oggle [g]it show [d]eleted' })
       end,
     },
   },
