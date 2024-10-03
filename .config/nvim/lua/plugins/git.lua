@@ -71,15 +71,38 @@ return {
         map('n', '<leader>guh', gitsigns.undo_stage_hunk, { desc = '[g]it [u]ndo stage [h]unk' })
         map('n', '<leader>grb', gitsigns.reset_buffer, { desc = '[g]it [r]eset [b]uffer' })
         map('n', '<leader>gph', gitsigns.preview_hunk, { desc = '[g]it [p]review [h]unk' })
-        map('n', '<leader>gbl', gitsigns.blame_line, { desc = '[g]it [b]lame [l]ine' })
         map('n', '<leader>gdi', gitsigns.diffthis, { desc = '[g]it [d]iff against [i]ndex' })
         map('n', '<leader>gdc', function()
           gitsigns.diffthis '@'
         end, { desc = '[g]it [d]iff against last [c]ommit' })
         -- Toggles
-        map('n', '<leader>tgb', gitsigns.toggle_current_line_blame, { desc = '[t]oggle [g]it show [b]lame line' })
         map('n', '<leader>tgd', gitsigns.toggle_deleted, { desc = '[t]oggle [g]it show [d]eleted' })
       end,
+    },
+  },
+  {
+    'FabijanZulj/blame.nvim',
+    opts = {
+      blame_options = { '-w' },
+      -- manually set some Catpuccin Mocha hexcodes
+      -- Picker seems to choose colors from order they are listed here.
+      -- Ideally should try to order theme colors in contrasting order
+      colors = {
+        '#f5e0dc',
+        '#f38ba8',
+        '#a6e3a1',
+        '#94e2d5',
+        '#cba6f7',
+        '#fab387',
+        '#f9e2af',
+        '#f5c2e7',
+        '#f2cdcd',
+        '#eba0ac',
+        '#fab387',
+      },
+    },
+    keys = {
+      { '<leader>gb', '<cmd>BlameToggle<cr>', desc = '[G]it [B]lame' },
     },
   },
 }
