@@ -67,3 +67,5 @@ vim.opt.termguicolors = true
 
 -- Set conceallevel to 1
 vim.opt.conceallevel = 2
+
+vim.opt.expandtab = true
