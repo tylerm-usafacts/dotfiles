@@ -41,7 +41,7 @@ sudo install lazygit -D -t /usr/local/bin/
 
 echo "Installing neovim..."
 # Install pre-built neovim
-sudo apt-get install ninja-build gettext cmake
+sudo apt-get install -y ninja-build gettext cmake
 git clone https://github.com/neovim/neovim.git
 cd neovim
 git checkout v0.11.2
