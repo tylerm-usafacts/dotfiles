@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Installing dotfiles config..."
-apt update -y && apt install -y build-essential fzf gcc gh lazygit lua-language-server make neovim node pyenv-virtualenv ripgrep starship tree unzip xclip zoxide
+sudo apt update -y && sudo apt install -y build-essential fzf gcc gh lazygit lua-language-server make neovim node pyenv-virtualenv ripgrep starship tree unzip xclip zoxide
 
 echo "Creating config directories..."
 mkdir -p ~/.config/nvim
