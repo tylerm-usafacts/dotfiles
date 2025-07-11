@@ -23,7 +23,8 @@ cp -r ~/dotfiles/.config/wezterm/* ~/.config/wezterm/
 cp ~/dotfiles/.zshrc ~/.zshrc
 
 echo "Installing nvm..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+nvm install 22.17.0
 
 echo "Installing dependencies..."
 sudo apt update -y && sudo apt install -y build-essential fzf gcc gh make ripgrep tree unzip xclip zoxide
@@ -40,10 +41,12 @@ sudo install lazygit -D -t /usr/local/bin/
 
 echo "Installing neovim..."
 # Install pre-built neovim
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-sudo rm -rf /opt/nvim
-sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> ~/.zshrc
+sudo apt-get install ninja-build gettext cmake
+git clone https://github.com/neovim/neovim.git
+cd neovim
+git checkout v0.11.2
+make CMAKE_BUILD_TYPE=Release
+sudo make install
 
 echo "Installing starship..."
 # Install starship from installer
