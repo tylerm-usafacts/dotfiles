@@ -15,11 +15,11 @@ echo "Installing neovim..."
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
 sudo rm -rf /opt/nvim
 sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin" > ~/.zshrc
+echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin' >> ~/.zshrc
 
 echo "Installing starship..."
 # Install starship from installer
-curl -sS https://starship.rs/install.sh | sh
+curl -sS https://starship.rs/install.sh | sh -y
 
 # Create config directories
 echo "Creating config directories..."
