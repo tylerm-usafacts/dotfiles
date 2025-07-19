@@ -26,7 +26,7 @@ cp ~/dotfiles/.zshrc ~/.zshrc
 
 # Install system dependencies
 echo "Installing dependencies..."
-sudo apt update -y && sudo apt install -y build-essential gcc gh make ripgrep tree unzip xclip ninja-build gettext cmake
+sudo apt update -y && sudo apt install -y build-essential gcc gh make ripgrep tree unzip xclip ninja-build gettext cmake xdg-utils
 
 # Install fzf
 echo "Installing fzf..."
