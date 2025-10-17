@@ -63,6 +63,6 @@ curl -sS https://starship.rs/install.sh | sh -s -- --yes
 echo "Installing neovim..."
 git clone https://github.com/neovim/neovim.git
 cd neovim
-git checkout v0.11.2
+git checkout v0.11.4
 make CMAKE_BUILD_TYPE=Release
 sudo make install
