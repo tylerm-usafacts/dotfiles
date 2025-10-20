@@ -57,13 +57,11 @@ sudo install lazygit -D -t /usr/local/bin/
 
 # Install wezterm
 echo "Installing wezterm..."
-curl https://sh.rustup.rs -sSf | sh -s
-curl -LO https://github.com/wezterm/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz
-tar -xzf wezterm-20240203-110809-5046fc22-src.tar.gz
-cd wezterm-20240203-110809-5046fc22
-./get-deps
-cargo build --release
-cargo run --release --bin wezterm -- start
+curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list
+sudo chmod 644 /usr/share/keyrings/wezterm-fury.gpg
+sudo apt update
+sudo apt install wezterm
 
 # Install starship from installer
 echo "Installing starship..."
