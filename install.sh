@@ -55,6 +55,16 @@ curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/downl
 tar xf lazygit.tar.gz lazygit
 sudo install lazygit -D -t /usr/local/bin/
 
+# Install wezterm
+echo "Installing wezterm..."
+curl https://sh.rustup.rs -sSf | sh -s
+curl -LO https://github.com/wezterm/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz
+tar -xzf wezterm-20240203-110809-5046fc22-src.tar.gz
+cd wezterm-20240203-110809-5046fc22
+./get-deps
+cargo build --release
+cargo run --release --bin wezterm -- start
+
 # Install starship from installer
 echo "Installing starship..."
 curl -sS https://starship.rs/install.sh | sh -s -- --yes
