@@ -1,11 +1,11 @@
 local wezterm = require 'wezterm'
 
-local module = {}
+local M = {}
 
-module.devpods = {}
-module.ssh_domains = {}
+M.devpods = {}
+M.ssh_domains = {}
 
-function module.get_container_ids()
+M.get_container_ids = function()
   local container_ids = {}
   local cmd = "docker container ls --format '{{.ID}}'"
   local handle = io.popen(cmd)
@@ -18,7 +18,7 @@ function module.get_container_ids()
   return container_ids
 end
 
-function module.map_ports(ports)
+M.map_ports = function(ports)
   local port_map = {}
   if ports and ports ~= '' then
     for container_port, host_port in ports:gmatch '(%S+)->(%S+)' do
@@ -28,7 +28,7 @@ function module.map_ports(ports)
   return port_map
 end
 
-function module.extract_workspace_name(image)
+M.extract_workspace_name = function(image)
   local workspace = image:match '^([^:]+)'
   if workspace then
     workspace = workspace:match '^(.*)%-.+$' or workspace
@@ -36,8 +36,8 @@ function module.extract_workspace_name(image)
   return workspace
 end
 
-function module.get_devpod_info()
-  local ids = module.get_container_ids()
+M.get_devpod_info = function()
+  local ids = M.get_container_ids()
   local devpods = {}
 
   for _, id in ipairs(ids) do
@@ -52,8 +52,8 @@ function module.get_devpod_info()
       if line then
         local name, ip, image, state, user, ports = line:match '^/(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S*)%s*(.*)$'
         if name and image and ports then
-          local workspace = module.extract_workspace_name(image)
-          local port_map = module.map_ports(ports)
+          local workspace = M.extract_workspace_name(image)
+          local port_map = M.map_ports(ports)
           devpods[name] = {
             ip = ip,
             image = image,
@@ -69,17 +69,17 @@ function module.get_devpod_info()
   return devpods
 end
 
-function module.create_ssh_domains()
-  if next(module.ssh_domains) ~= nil then
-    return module.ssh_domains
+M.create_ssh_domains = function()
+  if next(M.ssh_domains) ~= nil then
+    return M.ssh_domains
   end
 
-  if next(module.devpods) == nil then
-    module.devpods = module.get_devpod_info()
+  if next(M.devpods) == nil then
+    M.devpods = M.get_devpod_info()
   end
 
-  for name, data in pairs(module.devpods) do
-    table.insert(module.ssh_domains, {
+  for name, data in pairs(M.devpods) do
+    table.insert(M.ssh_domains, {
       name = data.workspace or name,
       remote_address = string.format('127.0.0.1:%s', data.ports['8888/tcp']),
       username = data.user or 'vscode',
@@ -92,60 +92,40 @@ function module.create_ssh_domains()
       },
     })
   end
-  return module.ssh_domains
+  return M.ssh_domains
 end
 
-function module.apply_to_config(config)
-  config.ssh_domains = module.create_ssh_domains()
-  config.keys = {
-    -- This will create a new split and run my default program inside it
-    {
-      key = 'd',
-      mods = 'SUPER',
-      action = wezterm.action.SplitPane {
-        direction = 'Down',
-        size = { Percent = 30 },
-      },
-    },
-    {
-      key = 'r',
-      mods = 'SUPER',
-      action = wezterm.action.SplitPane {
-        direction = 'Right',
-        size = { Percent = 50 },
-      },
-    },
-    {
-      key = 'w',
-      mods = 'SUPER',
-      action = wezterm.action.CloseCurrentTab { confirm = true },
-    },
-    {
-      key = 'e',
-      mods = 'SUPER',
-      action = wezterm.action.CloseCurrentPane { confirm = false },
-    },
-    {
-      key = 'h',
-      mods = 'SUPER',
-      action = wezterm.action.ActivatePaneDirection 'Left',
-    },
-    {
-      key = 'l',
-      mods = 'SUPER',
-      action = wezterm.action.ActivatePaneDirection 'Right',
-    },
-    {
-      key = 'k',
-      mods = 'SUPER',
-      action = wezterm.action.ActivatePaneDirection 'Up',
-    },
-    {
-      key = 'j',
-      mods = 'SUPER',
-      action = wezterm.action.ActivatePaneDirection 'Down',
-    },
-  }
+M.create_container_choices = function()
+  local container_choices = {}
+
+  if next(M.devpods) == nil then
+    M.devpods = M.get_devpod_info()
+  end
+
+  table.insert(container_choices, {
+    label = 'local',
+  })
+
+  for _, pod in pairs(M.devpods) do
+    local domain = wezterm.mux.get_domain(pod.workspace)
+    local label = 'devpod: ' .. pod.workspace
+    if domain:state() == 'Attached' then
+      label = label .. ' *'
+    end
+
+    table.insert(container_choices, {
+      label = label,
+    })
+  end
+  table.insert(container_choices, {
+    label = '󰌙 detach domains',
+  })
+
+  table.insert(container_choices, {
+    label = '󰑓 reload domains',
+  })
+
+  return container_choices
 end
 
-return module
+return M

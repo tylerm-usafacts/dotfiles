@@ -25,3 +25,6 @@ export NVM_DIR="$HOME/.nvm"
 alias chex="chmod -R 755 ~/.local/bin/"
 alias lg="lazygit"
 alias zrc="source ~/.zshrc"
+
+# opencode
+export PATH=/Users/tylerm-admin/.opencode/bin:$PATH
