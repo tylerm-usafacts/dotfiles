@@ -18,7 +18,7 @@ M.keys = {
     mods = 'SUPER',
     action = act.SplitPane {
       direction = 'Right',
-      size = { Percent = 50 },
+      size = { Percent = 30 },
     },
   },
   {
