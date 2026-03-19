@@ -28,6 +28,5 @@
     "pyright-lsp@claude-plugins-official": true
   },
   "effortLevel": "medium",
-  "fastMode": false,
-  "model": "opus[1m]"
+  "fastMode": false
 }
