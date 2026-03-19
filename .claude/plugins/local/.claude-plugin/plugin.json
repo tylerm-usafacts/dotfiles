@@ -1,0 +1,4 @@
+{
+  "name": "shared-skills",
+  "description": "Local plugin that provides shared skills from ~/.config/ai/skills"
+}

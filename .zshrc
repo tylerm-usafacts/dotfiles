@@ -27,4 +27,4 @@ alias lg="lazygit"
 alias zrc="source ~/.zshrc"
 
 # opencode
-export PATH=/Users/tylerm-admin/.opencode/bin:$PATH
+export PATH=$HOME/.opencode/bin:$PATH
