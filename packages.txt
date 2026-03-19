@@ -6,11 +6,13 @@ lua-language-server
 make
 neovim
 node
-pyenv-virtualenv
+pyenv
 ripgrep
 starship
 stow
 tree
 unzip
+wezterm
 xclip
 zoxide
+zsh
