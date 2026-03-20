@@ -1,1 +1,3 @@
---ignore=.stowrc
+--ignore=^\.stowrc$
+--ignore=^install\.sh$
+--ignore=^packages\.txt$
