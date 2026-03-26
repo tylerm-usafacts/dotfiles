@@ -154,6 +154,58 @@ is_container_runtime() {
     return 1
 }
 
+resolve_stow_conflicts() {
+    local source name target backup ts
+    ts=$(date +%Y%m%d-%H%M%S)
+
+    for source in "$DOTFILES_DIR"/.*; do
+        name=$(basename "$source")
+
+        case "$name" in
+            .|..|.git|.stowrc) continue ;;
+        esac
+
+        if [[ ! -e "$source" && ! -L "$source" ]]; then
+            continue
+        fi
+
+        if [[ -d "$source" && ! -L "$source" ]]; then
+            continue
+        fi
+
+        target="$HOME/$name"
+        if [[ ! -e "$target" && ! -L "$target" ]]; then
+            continue
+        fi
+
+        if [[ -d "$target" && ! -L "$target" ]]; then
+            continue
+        fi
+
+        if [[ -L "$target" ]]; then
+            rm -f "$target"
+            echo "Removed existing symlink: $target"
+            continue
+        fi
+
+        if [[ "${DOTFILES_FORCE_DELETE_CONFLICTS:-}" == "1" ]]; then
+            rm -f "$target"
+            echo "Removed conflicting file: $target"
+            continue
+        fi
+
+        if [[ "${DOTFILES_BACKUP_CONFLICTS:-}" == "1" ]] || ! is_container_runtime; then
+            backup="${target}.bak.${ts}"
+            mv "$target" "$backup"
+            echo "Backed up conflicting file: $target -> $backup"
+            continue
+        fi
+
+        rm -f "$target"
+        echo "Removed conflicting file in container: $target"
+    done
+}
+
 install_linux_neovim_from_source() {
     echo "Installing neovim from source..."
     git clone https://github.com/neovim/neovim.git /tmp/neovim
@@ -335,9 +387,12 @@ esac
 echo "Preparing directories for stow..."
 mkdir -p ~/.config ~/.claude/plugins ~/.local/bin
 
+echo "Resolving stow conflicts..."
+resolve_stow_conflicts
+
 echo "Stowing dotfiles..."
 cd "$DOTFILES_DIR"
-stow .
+stow --restow .
 
 if [[ -x "$HOME/.local/bin/sync-ai-config" ]]; then
     echo "Syncing AI config..."
