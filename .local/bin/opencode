@@ -1,0 +1,24 @@
+#!/bin/zsh
+
+set -euo pipefail
+
+script_dir=${0:A:h}
+"$script_dir/sync-ai-config"
+
+self_path=${0:A}
+real_binary=""
+
+for candidate in ${(f)"$(which -a opencode)"}; do
+  candidate_path=${candidate:A}
+  if [[ "$candidate_path" != "$self_path" ]]; then
+    real_binary="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$real_binary" ]]; then
+  echo "opencode wrapper: unable to find real 'opencode' binary on PATH" >&2
+  exit 1
+fi
+
+exec "$real_binary" "$@"

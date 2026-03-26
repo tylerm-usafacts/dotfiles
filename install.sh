@@ -80,6 +80,38 @@ install_linux_pyenv() {
     curl -fsSL https://pyenv.run | sh
 }
 
+install_linux_yq() {
+    if command -v yq &>/dev/null && yq --version 2>/dev/null | grep -qi "mikefarah"; then
+        return
+    fi
+
+    command -v jq &>/dev/null || {
+        echo "install_linux_yq requires jq to be installed first"
+        exit 1
+    }
+
+    echo "Installing mikefarah/yq..."
+    local version arch url tmp_bin
+    version=$(curl -fsSL "https://api.github.com/repos/mikefarah/yq/releases/latest" | jq -r '.tag_name')
+
+    case "$(uname -m)" in
+        x86_64) arch="amd64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *)
+            echo "Unsupported architecture for yq: $(uname -m)"
+            exit 1
+            ;;
+    esac
+
+    url="https://github.com/mikefarah/yq/releases/download/${version}/yq_linux_${arch}"
+    tmp_bin="/tmp/yq_linux_${arch}"
+
+    curl -fsSL "$url" -o "$tmp_bin"
+    chmod +x "$tmp_bin"
+    sudo install "$tmp_bin" /usr/local/bin/yq
+    rm -f "$tmp_bin"
+}
+
 install_linux_lazygit() {
     command -v lazygit &>/dev/null && return
     echo "Installing lazygit..."
@@ -173,5 +205,10 @@ mkdir -p ~/.config ~/.claude/plugins ~/.local/bin
 echo "Stowing dotfiles..."
 cd "$DOTFILES_DIR"
 stow .
+
+if [[ -x "$HOME/.local/bin/sync-ai-config" ]]; then
+    echo "Syncing AI config..."
+    "$HOME/.local/bin/sync-ai-config"
+fi
 
 echo "Done!"

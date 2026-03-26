@@ -30,11 +30,13 @@ The script detects your OS and handles everything automatically:
 ├── .config/
 │   ├── ai/                    # Shared AI agent instructions
 │   │   ├── AGENTS.md          # Instructions used by both Claude Code and OpenCode
-│   │   └── skills/            # Shared skills (both systems pick these up)
+│   │   ├── skills/            # Shared skills (both systems pick these up)
+│   │   └── agents/            # Shared custom agent definitions (single source)
 │   ├── opencode/              # OpenCode configuration
 │   │   ├── opencode.json      # Settings and permissions
 │   │   ├── AGENTS.md          # -> ../ai/AGENTS.md (symlink)
-│   │   └── skills             # -> ../ai/skills (symlink)
+│   │   ├── skills             # -> ../ai/skills (symlink)
+│   │   └── agents/            # Generated from ../ai/agents via sync-ai-config
 │   ├── git/                   # Global git config (includes global gitignore)
 │   ├── gh/                    # GitHub CLI config
 │   ├── nvim/                  # Neovim configuration
@@ -67,7 +69,18 @@ To add a new tool, add a line to `packages.txt`. If it needs a custom Linux inst
 
 ## AI agent config
 
-Agent instructions and skills are shared between Claude Code and OpenCode from a single source of truth at `.config/ai/`:
+AI instructions, skills, and custom agents use `.config/ai/` as the source of truth.
 
-- **Claude Code** — `.claude/CLAUDE.md` imports `.config/ai/AGENTS.md` via the `@` directive. Shared skills are available through a local plugin that symlinks to `.config/ai/skills/`.
-- **OpenCode** — `.config/opencode/AGENTS.md` and `.config/opencode/skills` are symlinks to the shared location. `opencode.json` also references the shared instructions via the `instructions` field.
+- Shared instructions: `.config/ai/AGENTS.md`
+- Shared skills: `.config/ai/skills/`
+- Shared custom agents: `.config/ai/agents/*.md` (canonical YAML frontmatter + markdown prompt)
+
+Sync lifecycle:
+
+- `sync-ai-config` publishes custom agents to tool-native locations:
+  - `~/.claude/agents/*.md`
+  - `~/.config/opencode/agents/*.md`
+- `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
+- `sync-ai-config` depends on `yq` and `jq`.
+
+For agent authoring rules, supported frontmatter, and troubleshooting, see `.config/ai/agents/README.md`.

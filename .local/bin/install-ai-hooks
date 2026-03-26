@@ -1,0 +1,75 @@
+#!/bin/zsh
+
+set -euo pipefail
+
+repo_root=${1:-$HOME/dotfiles}
+
+if [[ ! -d "$repo_root/.git/hooks" ]]; then
+  echo "install-ai-hooks: not a git repo or hooks dir missing: $repo_root" >&2
+  exit 1
+fi
+
+post_checkout_hook="$repo_root/.git/hooks/post-checkout"
+post_merge_hook="$repo_root/.git/hooks/post-merge"
+managed_start="# >>> sync-ai-config (managed) >>>"
+managed_end="# <<< sync-ai-config (managed) <<<"
+sync_line='"$HOME/.local/bin/sync-ai-config" || exit 1'
+backup_paths=()
+
+install_or_update_hook() {
+  local hook_path="$1"
+
+  local result
+  result=$(python3 - "$hook_path" "$managed_start" "$managed_end" "$sync_line" <<'PY'
+from pathlib import Path
+import sys
+
+hook_path = Path(sys.argv[1])
+start = sys.argv[2]
+end = sys.argv[3]
+sync_line = sys.argv[4]
+managed_block = f"{start}\n{sync_line}\n{end}\n"
+
+if hook_path.exists():
+    original = hook_path.read_text(encoding="utf-8")
+
+    if start in original and end in original:
+        prefix, remainder = original.split(start, 1)
+        _, suffix = remainder.split(end, 1)
+        updated = f"{prefix}{managed_block}{suffix.lstrip('\\n')}"
+    else:
+        backup_path = Path(str(hook_path) + ".bak")
+        backup_path.write_text(original, encoding="utf-8")
+        print(f"backup_created:{backup_path}")
+        separator = "" if original.endswith("\n") or not original else "\n"
+        updated = f"{original}{separator}{managed_block}"
+else:
+    updated = f"#!/bin/sh\n{managed_block}"
+
+hook_path.write_text(updated, encoding="utf-8")
+PY
+)
+
+  local line
+  for line in ${(f)result}; do
+    if [[ "$line" == backup_created:* ]]; then
+      backup_paths+=("${line#backup_created:}")
+    fi
+  done
+
+  chmod +x "$hook_path"
+}
+
+install_or_update_hook "$post_checkout_hook"
+install_or_update_hook "$post_merge_hook"
+
+echo "Installed/updated git hooks (existing content preserved):"
+echo "- $post_checkout_hook"
+echo "- $post_merge_hook"
+if (( ${#backup_paths[@]} > 0 )); then
+  echo "- Created backup(s):"
+  backup_path=""
+  for backup_path in "${backup_paths[@]}"; do
+    echo "  - $backup_path"
+  done
+fi

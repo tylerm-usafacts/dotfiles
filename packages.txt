@@ -1,6 +1,7 @@
 fzf
 gcc
 gh
+jq
 lazygit
 lua-language-server
 make
@@ -14,5 +15,6 @@ tree
 unzip
 wezterm
 xclip
+yq
 zoxide
 zsh
