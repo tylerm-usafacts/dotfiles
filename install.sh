@@ -148,16 +148,88 @@ install_linux_starship() {
     curl -sS https://starship.rs/install.sh | sh -s -- --yes
 }
 
-install_linux_neovim() {
-    command -v nvim &>/dev/null && return
-    echo "Installing neovim..."
+is_container_runtime() {
+    [[ -f /.dockerenv ]] && return 0
+    grep -qaE "(docker|containerd|kubepods)" /proc/1/cgroup 2>/dev/null && return 0
+    return 1
+}
+
+install_linux_neovim_from_source() {
+    echo "Installing neovim from source..."
     git clone https://github.com/neovim/neovim.git /tmp/neovim
     cd /tmp/neovim
-    git checkout v0.11.4
+    if [[ -n "${NEOVIM_VERSION:-}" ]]; then
+        git checkout "$NEOVIM_VERSION"
+    fi
     make CMAKE_BUILD_TYPE=Release
     sudo make install
     cd "$DOTFILES_DIR"
     rm -rf /tmp/neovim
+}
+
+install_linux_neovim() {
+    command -v nvim &>/dev/null && return
+
+    if ! command -v jq &>/dev/null; then
+        echo "neovim install requires jq"
+        return 1
+    fi
+
+    local version arch asset url tmp_archive tmp_dir extracted_dir
+
+    case "$(uname -m)" in
+        x86_64) arch="x86_64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *)
+            echo "Unsupported architecture for neovim: $(uname -m)"
+            return 1
+            ;;
+    esac
+
+    if [[ -n "${NEOVIM_VERSION:-}" ]]; then
+        version="$NEOVIM_VERSION"
+    else
+        version=$(curl -fsSL "https://api.github.com/repos/neovim/neovim/releases/latest" | jq -r '.tag_name')
+    fi
+
+    if [[ -z "$version" || "$version" == "null" ]]; then
+        echo "Could not determine latest neovim version"
+        return 1
+    fi
+
+    echo "Installing neovim ${version}..."
+
+    asset="nvim-linux-${arch}.tar.gz"
+    url="https://github.com/neovim/neovim/releases/download/${version}/${asset}"
+    tmp_archive="/tmp/${asset}"
+    tmp_dir="/tmp/nvim-install"
+
+    if ! curl -fsSL "$url" -o "$tmp_archive"; then
+        if [[ "${NEOVIM_ALLOW_SOURCE_BUILD:-}" == "1" ]] || ! is_container_runtime; then
+            echo "Prebuilt neovim archive unavailable, falling back to source build"
+            install_linux_neovim_from_source
+            return
+        fi
+
+        echo "Failed to fetch prebuilt neovim archive and source build is disabled in container runtimes"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    mkdir -p "$tmp_dir"
+    tar -xzf "$tmp_archive" -C "$tmp_dir"
+    extracted_dir=$(tar -tzf "$tmp_archive" | head -n 1 | cut -d/ -f1)
+
+    if [[ -z "$extracted_dir" || ! -d "$tmp_dir/$extracted_dir" ]]; then
+        rm -rf "$tmp_dir" "$tmp_archive"
+        echo "Unexpected neovim archive layout"
+        return 1
+    fi
+
+    sudo rm -rf /opt/nvim
+    sudo mv "$tmp_dir/$extracted_dir" /opt/nvim
+    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+    rm -rf "$tmp_dir" "$tmp_archive"
 }
 
 install_linux_lua_language_server() {
@@ -212,7 +284,12 @@ install_linux_via_apt() {
 
 install_linux() {
     echo "Updating system packages..."
-    sudo apt update -y && sudo apt upgrade -y
+    sudo apt update -y
+    if is_container_runtime && [[ "${DOTFILES_APT_UPGRADE:-}" != "1" ]]; then
+        echo "Skipping apt upgrade in container runtime"
+    else
+        sudo apt upgrade -y
+    fi
 
     # Install build dependencies
     sudo apt install -y \
@@ -234,6 +311,10 @@ install_linux() {
         echo "Setting zsh as default shell..."
         sudo usermod -s "$(which zsh)" "$(whoami)"
     fi
+
+    sudo apt clean
+    sudo rm -rf /var/lib/apt/lists/*
+    rm -rf /tmp/neovim /tmp/nvim-install /tmp/nvim-linux-*.tar.gz
 }
 
 # ─── Install packages ─────────────────────────────────────────────────────────
