@@ -156,6 +156,56 @@ install_linux_neovim() {
     rm -rf /tmp/neovim
 }
 
+install_linux_lua_language_server() {
+    command -v lua-language-server &>/dev/null && return
+
+    if ! command -v jq &>/dev/null; then
+        echo "lua-language-server install requires jq"
+        return 1
+    fi
+
+    echo "Installing lua-language-server..."
+
+    local arch release_api download_url tmp_archive install_dir
+    case "$(uname -m)" in
+        x86_64) arch="linux-x64" ;;
+        aarch64|arm64) arch="linux-arm64" ;;
+        *)
+            echo "Unsupported architecture for lua-language-server: $(uname -m)"
+            return 1
+            ;;
+    esac
+
+    release_api="https://api.github.com/repos/LuaLS/lua-language-server/releases/latest"
+    download_url=$(curl -fsSL "$release_api" | jq -r \
+        ".assets[] | select(.name | test(\"${arch}.*\\\\.tar\\\\.gz$\")) | .browser_download_url" | head -n 1)
+
+    if [[ -z "$download_url" || "$download_url" == "null" ]]; then
+        echo "Could not find lua-language-server release for ${arch}"
+        return 1
+    fi
+
+    tmp_archive="/tmp/lua-language-server.tar.gz"
+    install_dir="/opt/lua-language-server"
+
+    curl -fsSL "$download_url" -o "$tmp_archive"
+    sudo rm -rf "$install_dir"
+    sudo mkdir -p "$install_dir"
+    sudo tar -xzf "$tmp_archive" -C "$install_dir"
+    sudo ln -sf "$install_dir/bin/lua-language-server" /usr/local/bin/lua-language-server
+    rm -f "$tmp_archive"
+}
+
+install_linux_via_apt() {
+    local pkg="$1"
+    command -v "$pkg" &>/dev/null && return
+
+    echo "Installing ${pkg} via apt..."
+    if ! sudo apt install -y "$pkg"; then
+        echo "Skipping ${pkg}: package unavailable in current apt sources"
+    fi
+}
+
 install_linux() {
     echo "Updating system packages..."
     sudo apt update -y && sudo apt upgrade -y
@@ -171,9 +221,7 @@ install_linux() {
         if type "$func" &>/dev/null; then
             "$func"
         else
-            command -v "$pkg" &>/dev/null && continue
-            echo "Installing $pkg via apt..."
-            sudo apt install -y "$pkg"
+            install_linux_via_apt "$pkg"
         fi
     done < "$PACKAGES_FILE"
 
