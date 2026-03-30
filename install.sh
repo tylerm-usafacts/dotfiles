@@ -155,26 +155,21 @@ is_container_runtime() {
 }
 
 resolve_stow_conflicts() {
-    local source name target backup ts
+    local rel source target backup ts
     ts=$(date +%Y%m%d-%H%M%S)
 
-    for source in "$DOTFILES_DIR"/.*; do
-        name=$(basename "$source")
-
-        case "$name" in
-            .|..|.git|.stowrc) continue ;;
+    while IFS= read -r -d '' rel; do
+        case "$rel" in
+            .stowrc|install.sh|packages.txt) continue ;;
         esac
 
-        if [[ ! -e "$source" && ! -L "$source" ]]; then
-            continue
-        fi
-
-        if [[ -d "$source" && ! -L "$source" ]]; then
-            continue
-        fi
-
-        target="$HOME/$name"
+        source="$DOTFILES_DIR/$rel"
+        target="$HOME/$rel"
         if [[ ! -e "$target" && ! -L "$target" ]]; then
+            continue
+        fi
+
+        if [[ ( -e "$source" || -L "$source" ) && "$target" -ef "$source" ]]; then
             continue
         fi
 
@@ -203,7 +198,7 @@ resolve_stow_conflicts() {
 
         rm -f "$target"
         echo "Removed conflicting file in container: $target"
-    done
+    done < <(git -C "$DOTFILES_DIR" ls-files -z && git -C "$DOTFILES_DIR" ls-files --others --exclude-standard -z)
 }
 
 install_linux_neovim_from_source() {
@@ -392,7 +387,7 @@ resolve_stow_conflicts
 
 echo "Stowing dotfiles..."
 cd "$DOTFILES_DIR"
-stow --restow .
+stow --no-folding --restow .
 
 if [[ -x "$HOME/.local/bin/sync-ai-config" ]]; then
     echo "Syncing AI config..."
