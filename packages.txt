@@ -1,3 +1,4 @@
+ast-grep
 fzf
 gcc
 gh
@@ -7,6 +8,7 @@ lua-language-server
 make
 neovim
 node
+tree-sitter
 pyenv
 ripgrep
 starship

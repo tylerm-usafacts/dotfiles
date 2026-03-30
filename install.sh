@@ -27,6 +27,7 @@ echo "Detected OS: $OS"
 brew_name() {
     case "$1" in
         pyenv)   echo "pyenv-virtualenv" ;;
+        tree-sitter) echo "tree-sitter-cli" ;;
         zsh)     return 1 ;; # macOS ships with zsh
         *)       echo "$1" ;;
     esac
@@ -76,6 +77,21 @@ install_linux_node() {
     # shellcheck source=/dev/null
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install node
+}
+
+install_linux_tree_sitter() {
+    command -v tree-sitter &>/dev/null && return
+
+    echo "Installing tree-sitter..."
+    if sudo apt install -y tree-sitter-cli; then
+        return
+    fi
+
+    if ! command -v npm &>/dev/null; then
+        install_linux_node
+    fi
+
+    npm install -g tree-sitter-cli
 }
 
 install_linux_pyenv() {

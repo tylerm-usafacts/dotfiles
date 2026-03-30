@@ -83,7 +83,7 @@ return {
     },
     opts = {
       options = {
-        theme = 'catppuccin',
+        theme = 'catppuccin-macchiato',
         component_separators = '|',
       },
     },

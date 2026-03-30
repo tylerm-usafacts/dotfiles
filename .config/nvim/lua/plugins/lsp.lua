@@ -248,6 +248,7 @@ return {
         'lua',
         'luadoc',
         'markdown',
+        'latex',
         'yaml',
         'json',
         'vim',
@@ -326,7 +327,39 @@ return {
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
       -- Prefer git instead of curl in order to improve connectivity in some environments
-      require('nvim-treesitter.install').prefer_git = true
+      local ts_install = require('nvim-treesitter.install')
+      ts_install.prefer_git = true
+      ts_install.ts_generate_args = { 'generate', '--abi', vim.treesitter.language_version }
+
+      local query = require 'vim.treesitter.query'
+      local directive_opts = vim.fn.has 'nvim-0.10' == 1 and { force = true, all = false } or true
+      local injection_aliases = {
+        ex = 'elixir',
+        pl = 'perl',
+        sh = 'bash',
+        ts = 'typescript',
+        uxn = 'uxntal',
+      }
+      local first_node = function(node)
+        if type(node) == 'table' then
+          return node[1]
+        end
+        return node
+      end
+
+      query.add_directive('set-lang-from-info-string!', function(match, _, bufnr, pred, metadata)
+        local node = first_node(match[pred[2]])
+        if not node then
+          return
+        end
+        local text = vim.treesitter.get_node_text(node, bufnr)
+        if not text or text == '' then
+          return
+        end
+        local alias = text:lower()
+        metadata['injection.language'] = vim.filetype.match { filename = 'a.' .. alias } or injection_aliases[alias] or alias
+      end, directive_opts)
+
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup(opts)
     end,

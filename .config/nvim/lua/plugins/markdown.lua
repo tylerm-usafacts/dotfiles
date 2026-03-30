@@ -204,8 +204,6 @@ return {
           head = 'RenderMarkdownTableHead',
           -- Highlight for everything else, main table rows and the line below
           row = 'RenderMarkdownTableRow',
-          -- Highlight for inline padding used to add back concealed space
-          filler = 'RenderMarkdownTableFill',
         },
         -- Callouts are a special instance of a 'block_quote' that start with a 'shortcut_link'
         -- Can specify as many additional values as you like following the pattern from any below, such as 'note'
@@ -261,10 +259,6 @@ return {
         sign = {
           -- Turn on / off sign rendering
           enabled = true,
-          -- More granular mechanism, disable signs within specific buftypes
-          exclude = {
-            buftypes = { 'nofile' },
-          },
           -- Applies to background of sign text
           highlight = 'RenderMarkdownSign',
         },

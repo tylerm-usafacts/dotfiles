@@ -12,8 +12,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require('lazy').setup {
-
+require('lazy').setup({
   -----------------------------------------------
   -- SECTION ------------------------------------
   -- ui.lua -------------------------------------
@@ -63,12 +62,6 @@ require('lazy').setup {
   -- markdown preview + obsidian ----------------
   -----------------------------------------------
   require 'plugins.markdown',
-
-  -----------------------------------------------
-  -- SECTION ------------------------------------
-  -- ai.lua -------------------------------------
-  -- codecompanion ------------------------------
-  -----------------------------------------------
-
-  require 'plugins.ai',
-}
+}, {
+  rocks = { enabled = false },
+})
