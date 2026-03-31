@@ -8,6 +8,8 @@ lua-language-server
 make
 neovim
 node
+claude
+opencode
 tree-sitter
 pyenv
 ripgrep

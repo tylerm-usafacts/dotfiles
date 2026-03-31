@@ -8,16 +8,23 @@ script_dir=${0:A:h}
 self_path=${0:A}
 real_binary=""
 
-for candidate in ${(f)"$(which -a opencode)"}; do
-  candidate_path=${candidate:A}
-  if [[ "$candidate_path" != "$self_path" ]]; then
-    real_binary="$candidate"
-    break
-  fi
-done
+if [[ -x "$HOME/.opencode/bin/opencode" ]]; then
+  real_binary="$HOME/.opencode/bin/opencode"
+fi
+
+if [[ -z "$real_binary" ]]; then
+  for candidate in ${(f)"$(which -a opencode)"}; do
+    candidate_path=${candidate:A}
+    if [[ "$candidate_path" != "$self_path" ]]; then
+      real_binary="$candidate"
+      break
+    fi
+  done
+fi
 
 if [[ -z "$real_binary" ]]; then
   echo "opencode wrapper: unable to find real 'opencode' binary on PATH" >&2
+  echo "Run: curl -fsSL https://opencode.ai/install | bash" >&2
   exit 1
 fi
 

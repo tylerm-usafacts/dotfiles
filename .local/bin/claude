@@ -8,16 +8,23 @@ script_dir=${0:A:h}
 self_path=${0:A}
 real_binary=""
 
-for candidate in ${(f)"$(which -a claude)"}; do
-  candidate_path=${candidate:A}
-  if [[ "$candidate_path" != "$self_path" ]]; then
-    real_binary="$candidate"
-    break
-  fi
-done
+if [[ -x "$HOME/.claude-code/bin/claude" ]]; then
+  real_binary="$HOME/.claude-code/bin/claude"
+fi
+
+if [[ -z "$real_binary" ]]; then
+  for candidate in ${(f)"$(which -a claude)"}; do
+    candidate_path=${candidate:A}
+    if [[ "$candidate_path" != "$self_path" ]]; then
+      real_binary="$candidate"
+      break
+    fi
+  done
+fi
 
 if [[ -z "$real_binary" ]]; then
   echo "claude wrapper: unable to find real 'claude' binary on PATH" >&2
+  echo "Run: npm install -g @anthropic-ai/claude-code --prefix \"$HOME/.claude-code\"" >&2
   exit 1
 fi
 

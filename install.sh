@@ -33,6 +33,34 @@ brew_name() {
     esac
 }
 
+install_macos_opencode() {
+    [[ -x "$HOME/.opencode/bin/opencode" ]] && return
+    echo "Installing opencode..."
+    curl -fsSL https://opencode.ai/install | bash
+
+    if [[ ! -x "$HOME/.opencode/bin/opencode" ]]; then
+        echo "opencode installation did not create $HOME/.opencode/bin/opencode"
+        return 1
+    fi
+}
+
+install_macos_claude() {
+    [[ -x "$HOME/.claude-code/bin/claude" ]] && return
+
+    if ! command -v npm &>/dev/null; then
+        echo "claude install requires npm; install node first"
+        return 1
+    fi
+
+    echo "Installing claude..."
+    npm install -g @anthropic-ai/claude-code --prefix "$HOME/.claude-code"
+
+    if [[ ! -x "$HOME/.claude-code/bin/claude" ]]; then
+        echo "claude installation did not create $HOME/.claude-code/bin/claude"
+        return 1
+    fi
+}
+
 install_macos() {
     if ! command -v brew &>/dev/null; then
         echo "Installing Homebrew..."
@@ -42,6 +70,12 @@ install_macos() {
     echo "Installing packages via Homebrew..."
     while IFS= read -r pkg; do
         [[ -z "$pkg" || "$pkg" == \#* ]] && continue
+        func="install_macos_${pkg//-/_}"
+        if type "$func" &>/dev/null; then
+            "$func"
+            continue
+        fi
+
         formula=$(brew_name "$pkg") || continue
         brew install "$formula"
     done < "$PACKAGES_FILE"
@@ -162,6 +196,41 @@ install_linux_starship() {
     command -v starship &>/dev/null && return
     echo "Installing starship..."
     curl -sS https://starship.rs/install.sh | sh -s -- --yes
+}
+
+install_linux_opencode() {
+    [[ -x "$HOME/.opencode/bin/opencode" ]] && return
+    echo "Installing opencode..."
+    curl -fsSL https://opencode.ai/install | bash
+
+    if [[ ! -x "$HOME/.opencode/bin/opencode" ]]; then
+        echo "opencode installation did not create $HOME/.opencode/bin/opencode"
+        return 1
+    fi
+}
+
+install_linux_claude() {
+    [[ -x "$HOME/.claude-code/bin/claude" ]] && return
+
+    if ! command -v npm &>/dev/null; then
+        install_linux_node
+        export NVM_DIR="$HOME/.nvm"
+        # shellcheck source=/dev/null
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    fi
+
+    if ! command -v npm &>/dev/null; then
+        echo "claude install requires npm; node setup did not provide npm"
+        return 1
+    fi
+
+    echo "Installing claude..."
+    npm install -g @anthropic-ai/claude-code --prefix "$HOME/.claude-code"
+
+    if [[ ! -x "$HOME/.claude-code/bin/claude" ]]; then
+        echo "claude installation did not create $HOME/.claude-code/bin/claude"
+        return 1
+    fi
 }
 
 is_container_runtime() {
