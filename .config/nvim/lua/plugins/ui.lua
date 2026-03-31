@@ -1,47 +1,53 @@
 return {
-  -- Tree config
   {
-    'nvim-neo-tree/neo-tree.nvim',
-    version = '*',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
-      'MunifTanjim/nui.nvim',
-    },
-    cmd = 'Neotree',
-    keys = {
-      { '\\', ':Neotree reveal<CR>', { desc = 'NeoTree reveal' } },
-    },
+    'folke/snacks.nvim',
+    priority = 1000,
+    lazy = false,
     opts = {
-      filesystem = {
-        window = {
-          mappings = {
-            ['\\'] = 'close_window',
-          },
-        },
-        filtered_items = {
-          visible = true, -- if set to true, will still show hidden items
-          hide_dotfiles = false,
-          hide_gitignored = true,
-          hide_by_name = {
-            '.git',
-          },
+      styles = {
+        float = {
+          backdrop = false,
         },
       },
+      picker = {
+        enabled = true,
+        ui_select = true,
+        hidden = true,
+        ignored = false,
+        sources = {
+          explorer = { hidden = true },
+          files = { hidden = true },
+          grep = { hidden = true },
+        },
+      },
+      notifier = { enabled = true },
+      explorer = { enabled = true },
+      indent = { enabled = true },
+      scope = { enabled = true },
     },
-  },
-  {
-    'antosha417/nvim-lsp-file-operations',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      -- Uncomment whichever supported plugin(s) you use
-      -- "nvim-tree/nvim-tree.lua",
-      'nvim-neo-tree/neo-tree.nvim',
-      -- "simonmclean/triptych.nvim"
+    keys = {
+      {
+        '\\',
+        function()
+          require('snacks').explorer()
+        end,
+        desc = 'Explorer toggle',
+      },
+      {
+        '<leader>nn',
+        function()
+          require('snacks').notifier.show_history()
+        end,
+        desc = 'Notification History',
+      },
+      {
+        '<leader>nd',
+        function()
+          require('snacks').notifier.hide()
+        end,
+        desc = 'Dismiss Notifications',
+      },
     },
-    config = function()
-      require('lsp-file-operations').setup()
-    end,
   },
   -- UI Theme
   {
@@ -60,11 +66,9 @@ return {
         cmp = true,
         gitsigns = true,
         treesitter = true,
-        telescope = true,
         mason = true,
         which_key = true,
         notify = true,
-        neotree = true,
         noice = true,
       },
     },
@@ -72,6 +76,29 @@ return {
       require('catppuccin').setup(opts)
       vim.cmd.colorscheme 'catppuccin-macchiato'
       vim.api.nvim_set_hl(0, 'MsgArea', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'FloatBorder', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'FloatTitle', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'FloatFooter', { bg = 'none' })
+
+      for _, group in ipairs {
+        'SnacksPicker',
+        'SnacksPickerNormal',
+        'SnacksPickerBorder',
+        'SnacksPickerTitle',
+        'SnacksPickerFooter',
+        'SnacksPickerInput',
+        'SnacksPickerInputNormal',
+        'SnacksPickerInputBorder',
+        'SnacksPickerList',
+        'SnacksPickerListNormal',
+        'SnacksPickerListBorder',
+        'SnacksPickerPreview',
+        'SnacksPickerPreviewNormal',
+        'SnacksPickerPreviewBorder',
+      } do
+        vim.api.nvim_set_hl(0, group, { bg = 'none' })
+      end
     end,
   },
 
@@ -116,15 +143,6 @@ return {
     end,
   },
 
-  -- Add indentation guides even on blank lines
-  {
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help ibl`
-    main = 'ibl',
-    opts = {},
-  },
-
   -- Add fancy command popup + pretty notifcations (specifically adds configuration options for command prompt + notifications)
   {
     'folke/noice.nvim',
@@ -134,13 +152,12 @@ return {
     },
     dependencies = {
       'MunifTanjim/nui.nvim',
-      -- OPTIONAL:
-      --   `nvim-notify` is only needed, if you want to use the notification view.
-      --   If not available, we use `mini` as the fallback
-      'rcarriga/nvim-notify',
     },
     config = function()
       require('noice').setup {
+        notify = {
+          enabled = false,
+        },
         lsp = {
           progress = {
             enabled = true,
