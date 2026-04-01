@@ -24,7 +24,7 @@ The script detects your OS and handles everything automatically:
 ```
 ~/dotfiles/
 ├── install.sh                 # Cross-platform installer
-├── packages.txt               # Single source of truth for all tools
+├── packages.json              # Single source of truth for all tools
 ├── .zshrc                     # Shell configuration
 │
 ├── .config/
@@ -60,12 +60,23 @@ Directories that mix stow-managed config with runtime data (`~/.config`, `~/.cla
 
 ## Packages
 
-All desired tools are listed in `packages.txt`. This file is read by `install.sh` on both macOS and Linux:
+All desired tools are listed in `packages.json`. Each package declares an explicit installer strategy per OS:
 
-- **macOS**: each package is installed via `brew install` (with name mapping where brew formula names differ)
-- **Linux**: packages with a custom installer use it; everything else falls through to `apt install`
+- `type: "native"` uses a native install script with a required `detect` command
+- `type: "custom"` calls a function in `install.sh` (for packages with special logic)
+- `type: "brew"` / `type: "apt"` use package-manager defaults (with optional formula/package override)
+- `type: "skip"` skips install on that OS
+- `jq` and `yq` are installed at the start of `install.sh` before package parsing/install
 
-To add a new tool, add a line to `packages.txt`. If it needs a custom Linux install, add an `install_linux_<name>()` function to `install.sh`.
+To add a new tool, use the CLI:
+
+```bash
+dotfiles add <package>
+dotfiles add <package> --native "<install script>" --detect "<detect command>"
+dotfiles sync
+```
+
+Native package metadata lives with the package entry in `packages.json`.
 
 ## AI agent config
 

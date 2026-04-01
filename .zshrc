@@ -31,4 +31,3 @@ alias cd="z"
 
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
-export PATH="$HOME/.claude-code/bin:$PATH"

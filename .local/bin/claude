@@ -6,10 +6,14 @@ script_dir=${0:A:h}
 "$script_dir/sync-ai-config"
 
 self_path=${0:A}
+versions_dir="$HOME/.local/share/claude/versions"
 real_binary=""
 
-if [[ -x "$HOME/.claude-code/bin/claude" ]]; then
-  real_binary="$HOME/.claude-code/bin/claude"
+if [[ -d "$versions_dir" ]]; then
+  candidates=("$versions_dir"/*(N-.om[1]))
+  if (( ${#candidates} > 0 )) && [[ -x "${candidates[1]}" ]]; then
+    real_binary="${candidates[1]}"
+  fi
 fi
 
 if [[ -z "$real_binary" ]]; then
@@ -24,7 +28,7 @@ fi
 
 if [[ -z "$real_binary" ]]; then
   echo "claude wrapper: unable to find real 'claude' binary on PATH" >&2
-  echo "Run: npm install -g @anthropic-ai/claude-code --prefix \"$HOME/.claude-code\"" >&2
+  echo "Run: curl -fsSL https://claude.ai/install.sh | bash" >&2
   exit 1
 fi
 

@@ -1,3 +1,6 @@
 --ignore=^\.stowrc$
 --ignore=^install\.sh$
---ignore=^packages\.txt$
+--ignore=^packages\.json$
+--ignore=^\.config/opencode/node_modules(/.*)?$
+--ignore=^\.config/opencode/bun\.lock$
+--ignore=^\.config/opencode/package\.json$

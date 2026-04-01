@@ -3,12 +3,178 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: dotfiles sync"
+  echo "Usage: dotfiles <command>"
+  echo ""
+  echo "Commands:"
+  echo "  sync                                 Run dotfiles installer"
+  echo "  add <package> [--native <script>] [--detect <script>]"
+}
+
+require_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "dotfiles: jq is required" >&2
+    exit 1
+  fi
+}
+
+add_package() {
+  local pkg="$1"
+  shift
+
+  local native_install=""
+  local native_detect=""
+
+  while (( $# > 0 )); do
+    case "$1" in
+      --native)
+        if (( $# < 2 )) || [[ -z "$2" ]]; then
+          echo "dotfiles add: --native requires an install script" >&2
+          exit 1
+        fi
+        native_install="${2:-}"
+        shift 2
+        ;;
+      --detect)
+        if (( $# < 2 )) || [[ -z "$2" ]]; then
+          echo "dotfiles add: --detect requires a detect command" >&2
+          exit 1
+        fi
+        native_detect="${2:-}"
+        shift 2
+        ;;
+      *)
+        echo "dotfiles add: unknown option: $1" >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  if [[ -z "$pkg" ]]; then
+    echo "dotfiles add: package name is required" >&2
+    exit 1
+  fi
+
+  if [[ -n "$native_detect" && -z "$native_install" ]]; then
+    echo "dotfiles add: --detect requires --native" >&2
+    exit 1
+  fi
+
+  if [[ -n "$native_install" && -z "$native_detect" ]]; then
+    echo "dotfiles add: --native requires --detect" >&2
+    exit 1
+  fi
+
+  require_jq
+
+  local packages_file="$HOME/dotfiles/packages.json"
+  if [[ ! -f "$packages_file" ]]; then
+    echo '{"packages":[]}' > "$packages_file"
+  fi
+
+  local tmp_file
+  tmp_file=$(mktemp)
+
+  if [[ -n "$native_install" ]]; then
+    jq \
+      --arg name "$pkg" \
+      --arg install "$native_install" \
+      --arg detect "$native_detect" \
+      '
+      .packages |=
+        (
+          if any(.[]; .name == $name) then
+            map(
+              if .name == $name then
+                . + {
+                  installer: {
+                    macos: {
+                      type: "native",
+                      install: $install,
+                      detect: $detect
+                    },
+                    linux: {
+                      type: "native",
+                      install: $install,
+                      detect: $detect
+                    }
+                  }
+                }
+              else
+                .
+              end
+            )
+          else
+            . + [
+              {
+                name: $name,
+                installer: {
+                  macos: {
+                    type: "native",
+                    install: $install,
+                    detect: $detect
+                  },
+                  linux: {
+                    type: "native",
+                    install: $install,
+                    detect: $detect
+                  }
+                }
+              }
+            ]
+          end
+          | sort_by(.name)
+        )
+      ' "$packages_file" > "$tmp_file"
+  else
+    jq \
+      --arg name "$pkg" \
+      '
+      .packages |=
+        (
+          if any(.[]; .name == $name) then
+            map(
+              if .name == $name then
+                if (.installer | type) == "object" then
+                  .
+                else
+                  . + {
+                    installer: {
+                      macos: { type: "brew" },
+                      linux: { type: "apt" }
+                    }
+                  }
+                end
+              else
+                .
+              end
+            )
+          else
+            . + [
+              {
+                name: $name,
+                installer: {
+                  macos: { type: "brew" },
+                  linux: { type: "apt" }
+                }
+              }
+            ]
+          end
+          | sort_by(.name)
+        )
+      ' "$packages_file" > "$tmp_file"
+  fi
+
+  mv "$tmp_file" "$packages_file"
+  echo "Updated: $packages_file"
 }
 
 case "${1:-}" in
   sync)
     exec bash "$HOME/dotfiles/install.sh"
+    ;;
+  add)
+    shift
+    add_package "${1:-}" "${@:2}"
     ;;
   ""|-h|--help|help)
     usage

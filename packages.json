@@ -1,0 +1,188 @@
+{
+  "packages": [
+    {
+      "name": "ast-grep",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "fzf",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_fzf" }
+      }
+    },
+    {
+      "name": "gcc",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "gh",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "jq",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "lazygit",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_lazygit" }
+      }
+    },
+    {
+      "name": "lua-language-server",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_lua_language_server" }
+      }
+    },
+    {
+      "name": "make",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "neovim",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_neovim" }
+      }
+    },
+    {
+      "name": "node",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_node" }
+      }
+    },
+    {
+      "name": "claude",
+      "installer": {
+        "macos": {
+          "type": "native",
+          "detect": "test -d \"$HOME/.local/share/claude/versions\"",
+          "install": "curl -fsSL https://claude.ai/install.sh | bash"
+        },
+        "linux": {
+          "type": "native",
+          "detect": "test -d \"$HOME/.local/share/claude/versions\"",
+          "install": "curl -fsSL https://claude.ai/install.sh | bash"
+        }
+      }
+    },
+    {
+      "name": "opencode",
+      "installer": {
+        "macos": {
+          "type": "native",
+          "detect": "test -x \"$HOME/.opencode/bin/opencode\"",
+          "install": "curl -fsSL https://opencode.ai/install | bash"
+        },
+        "linux": {
+          "type": "native",
+          "detect": "test -x \"$HOME/.opencode/bin/opencode\"",
+          "install": "curl -fsSL https://opencode.ai/install | bash"
+        }
+      }
+    },
+    {
+      "name": "tree-sitter",
+      "installer": {
+        "macos": { "type": "brew", "formula": "tree-sitter-cli" },
+        "linux": { "type": "custom", "function": "install_linux_tree_sitter" }
+      }
+    },
+    {
+      "name": "pyenv",
+      "installer": {
+        "macos": { "type": "brew", "formula": "pyenv-virtualenv" },
+        "linux": { "type": "custom", "function": "install_linux_pyenv" }
+      }
+    },
+    {
+      "name": "ripgrep",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "starship",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_starship" }
+      }
+    },
+    {
+      "name": "stow",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "tree",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "unzip",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "wezterm",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_wezterm" }
+      }
+    },
+    {
+      "name": "xclip",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
+      "name": "yq",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_yq" }
+      }
+    },
+    {
+      "name": "zoxide",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "custom", "function": "install_linux_zoxide" }
+      }
+    },
+    {
+      "name": "zsh",
+      "installer": {
+        "macos": { "type": "skip" },
+        "linux": { "type": "apt" }
+      }
+    }
+  ]
+}

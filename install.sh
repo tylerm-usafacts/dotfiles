@@ -2,7 +2,7 @@
 set -e
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES_FILE="$DOTFILES_DIR/packages.txt"
+PACKAGES_FILE="$DOTFILES_DIR/packages.json"
 
 # ─── OS Detection ────────────────────────────────────────────────────────────
 
@@ -21,70 +21,126 @@ detect_os() {
 OS=$(detect_os)
 echo "Detected OS: $OS"
 
-# ─── macOS ───────────────────────────────────────────────────────────────────
+ensure_packages_file() {
+    if [[ ! -f "$PACKAGES_FILE" ]]; then
+        echo "Missing packages file: $PACKAGES_FILE"
+        exit 1
+    fi
+}
 
-# Map logical package names to brew formula names where they differ.
-brew_name() {
-    case "$1" in
-        pyenv)   echo "pyenv-virtualenv" ;;
-        tree-sitter) echo "tree-sitter-cli" ;;
-        zsh)     return 1 ;; # macOS ships with zsh
-        *)       echo "$1" ;;
+package_names() {
+    jq -r '.packages[].name' "$PACKAGES_FILE"
+}
+
+package_installer_field() {
+    local pkg="$1"
+    local field="$2"
+    jq -r --arg name "$pkg" --arg os "$OS" --arg field "$field" '
+        .packages[]
+        | select(.name == $name)
+        | .installer[$os][$field] // empty
+    ' "$PACKAGES_FILE" | head -n 1
+}
+
+install_package() {
+    local pkg="$1"
+    local type detect_cmd install_cmd fn formula apt_pkg
+
+    type=$(package_installer_field "$pkg" type)
+    if [[ -z "$type" ]]; then
+        echo "Missing installer.${OS}.type for package: $pkg"
+        return 1
+    fi
+
+    case "$type" in
+        native)
+            install_cmd=$(package_installer_field "$pkg" install)
+            detect_cmd=$(package_installer_field "$pkg" detect)
+
+            if [[ -z "$install_cmd" || -z "$detect_cmd" ]]; then
+                echo "native installer for $pkg requires install and detect"
+                return 1
+            fi
+
+            if bash -lc "$detect_cmd"; then
+                return 0
+            fi
+
+            echo "Installing ${pkg} via native installer..."
+            bash -lc "$install_cmd"
+
+            if ! bash -lc "$detect_cmd"; then
+                echo "Native install detect failed for ${pkg}"
+                return 1
+            fi
+            ;;
+        custom)
+            fn=$(package_installer_field "$pkg" function)
+            if [[ -z "$fn" ]]; then
+                echo "custom installer for $pkg requires function"
+                return 1
+            fi
+
+            if ! type "$fn" &>/dev/null; then
+                echo "custom installer function not found for $pkg: $fn"
+                return 1
+            fi
+
+            "$fn"
+            ;;
+        brew)
+            formula=$(package_installer_field "$pkg" formula)
+            [[ -z "$formula" ]] && formula="$pkg"
+            brew install "$formula"
+            ;;
+        apt)
+            apt_pkg=$(package_installer_field "$pkg" package)
+            [[ -z "$apt_pkg" ]] && apt_pkg="$pkg"
+            install_linux_via_apt "$apt_pkg"
+            ;;
+        skip)
+            return 0
+            ;;
+        *)
+            echo "Unsupported installer type for $pkg on $OS: $type"
+            return 1
+            ;;
     esac
 }
 
-install_macos_opencode() {
-    [[ -x "$HOME/.opencode/bin/opencode" ]] && return
-    echo "Installing opencode..."
-    curl -fsSL https://opencode.ai/install | bash
-
-    if [[ ! -x "$HOME/.opencode/bin/opencode" ]]; then
-        echo "opencode installation did not create $HOME/.opencode/bin/opencode"
-        return 1
-    fi
+is_core_dependency() {
+    local pkg="$1"
+    case "$pkg" in
+        jq|yq) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
-install_macos_claude() {
-    [[ -x "$HOME/.claude-code/bin/claude" ]] && return
-
-    if ! command -v npm &>/dev/null; then
-        echo "claude install requires npm; install node first"
-        return 1
-    fi
-
-    echo "Installing claude..."
-    npm install -g @anthropic-ai/claude-code --prefix "$HOME/.claude-code"
-
-    if [[ ! -x "$HOME/.claude-code/bin/claude" ]]; then
-        echo "claude installation did not create $HOME/.claude-code/bin/claude"
-        return 1
-    fi
-}
+# ─── macOS ───────────────────────────────────────────────────────────────────
 
 install_macos() {
+    ensure_packages_file
+
     if ! command -v brew &>/dev/null; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
+    echo "Installing core dependencies (jq, yq)..."
+    brew install jq yq
+
     echo "Installing packages via Homebrew..."
     while IFS= read -r pkg; do
-        [[ -z "$pkg" || "$pkg" == \#* ]] && continue
-        func="install_macos_${pkg//-/_}"
-        if type "$func" &>/dev/null; then
-            "$func"
-            continue
-        fi
-
-        formula=$(brew_name "$pkg") || continue
-        brew install "$formula"
-    done < "$PACKAGES_FILE"
+        [[ -z "$pkg" ]] && continue
+        is_core_dependency "$pkg" && continue
+        install_package "$pkg"
+    done < <(package_names)
 }
 
 # ─── Linux ───────────────────────────────────────────────────────────────────
 
 # Per-tool install functions for packages that need custom install on Linux.
-# Packages without a custom function fall through to apt install.
+# packages.json declares which packages use these custom installers.
 
 install_linux_fzf() {
     command -v fzf &>/dev/null && return
@@ -198,41 +254,6 @@ install_linux_starship() {
     curl -sS https://starship.rs/install.sh | sh -s -- --yes
 }
 
-install_linux_opencode() {
-    [[ -x "$HOME/.opencode/bin/opencode" ]] && return
-    echo "Installing opencode..."
-    curl -fsSL https://opencode.ai/install | bash
-
-    if [[ ! -x "$HOME/.opencode/bin/opencode" ]]; then
-        echo "opencode installation did not create $HOME/.opencode/bin/opencode"
-        return 1
-    fi
-}
-
-install_linux_claude() {
-    [[ -x "$HOME/.claude-code/bin/claude" ]] && return
-
-    if ! command -v npm &>/dev/null; then
-        install_linux_node
-        export NVM_DIR="$HOME/.nvm"
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    fi
-
-    if ! command -v npm &>/dev/null; then
-        echo "claude install requires npm; node setup did not provide npm"
-        return 1
-    fi
-
-    echo "Installing claude..."
-    npm install -g @anthropic-ai/claude-code --prefix "$HOME/.claude-code"
-
-    if [[ ! -x "$HOME/.claude-code/bin/claude" ]]; then
-        echo "claude installation did not create $HOME/.claude-code/bin/claude"
-        return 1
-    fi
-}
-
 is_container_runtime() {
     [[ -f /.dockerenv ]] && return 0
     grep -qaE "(docker|containerd|kubepods)" /proc/1/cgroup 2>/dev/null && return 0
@@ -240,12 +261,12 @@ is_container_runtime() {
 }
 
 resolve_stow_conflicts() {
-    local rel source target backup ts
+    local rel source target backup ts source_link target_link
     ts=$(date +%Y%m%d-%H%M%S)
 
     while IFS= read -r -d '' rel; do
         case "$rel" in
-            .stowrc|install.sh|packages.txt) continue ;;
+            .stowrc|install.sh|packages.json) continue ;;
         esac
 
         source="$DOTFILES_DIR/$rel"
@@ -254,17 +275,27 @@ resolve_stow_conflicts() {
             continue
         fi
 
+        if [[ -L "$target" ]]; then
+            if [[ -L "$source" ]]; then
+                source_link=$(readlink "$source" 2>/dev/null || true)
+                target_link=$(readlink "$target" 2>/dev/null || true)
+                if [[ "$target_link" == "$source_link" ]]; then
+                    continue
+                fi
+            elif [[ -e "$source" && "$target" -ef "$source" ]]; then
+                continue
+            fi
+
+            rm -f "$target"
+            echo "Removed existing symlink: $target"
+            continue
+        fi
+
         if [[ ( -e "$source" || -L "$source" ) && "$target" -ef "$source" ]]; then
             continue
         fi
 
         if [[ -d "$target" && ! -L "$target" ]]; then
-            continue
-        fi
-
-        if [[ -L "$target" ]]; then
-            rm -f "$target"
-            echo "Removed existing symlink: $target"
             continue
         fi
 
@@ -415,6 +446,8 @@ install_linux_via_apt() {
 }
 
 install_linux() {
+    ensure_packages_file
+
     echo "Updating system packages..."
     sudo apt update -y
     if is_container_runtime && [[ "${DOTFILES_APT_UPGRADE:-}" != "1" ]]; then
@@ -427,16 +460,16 @@ install_linux() {
     sudo apt install -y \
         build-essential cmake curl gettext git ninja-build xdg-utils
 
-    # Install each package: use custom function if defined, otherwise apt
+    echo "Installing core dependencies (jq, yq)..."
+    sudo apt install -y jq
+    install_linux_yq
+
+    # Install each package from declarative installer config
     while IFS= read -r pkg; do
-        [[ -z "$pkg" || "$pkg" == \#* ]] && continue
-        func="install_linux_${pkg//-/_}"
-        if type "$func" &>/dev/null; then
-            "$func"
-        else
-            install_linux_via_apt "$pkg"
-        fi
-    done < "$PACKAGES_FILE"
+        [[ -z "$pkg" ]] && continue
+        is_core_dependency "$pkg" && continue
+        install_package "$pkg"
+    done < <(package_names)
 
     # Set zsh as default shell
     if [[ "$SHELL" != "$(which zsh)" ]]; then
