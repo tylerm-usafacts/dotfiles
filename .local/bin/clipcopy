@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -t 0 ]]; then
+  printf 'Usage: <command> | clipcopy\n' >&2
+  exit 1
+fi
+
+payload="$(cat)"
+
+if [[ -z "$payload" ]]; then
+  exit 0
+fi
+
+max_bytes="${CLIPCOPY_MAX_BYTES:-100000}"
+if (( ${#payload} > max_bytes )); then
+  printf 'Refusing OSC52 copy larger than %s bytes\n' "$max_bytes" >&2
+  exit 1
+fi
+
+encoded="$(printf '%s' "$payload" | base64 | tr -d '\r\n')"
+osc52=$(printf '\033]52;c;%s\a' "$encoded")
+
+if [[ -n "${TMUX:-}" ]]; then
+  printf '\033Ptmux;\033%s\033\\' "$osc52"
+else
+  printf '%s' "$osc52"
+fi
