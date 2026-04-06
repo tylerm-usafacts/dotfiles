@@ -85,6 +85,7 @@ AI instructions, skills, and custom agents use `.config/ai/` as the source of tr
 - Shared instructions: `.config/ai/AGENTS.md`
 - Shared skills: `.config/ai/skills/`
 - Shared custom agents: `.config/ai/agents/*.md` (canonical YAML frontmatter + markdown prompt)
+- Shared references: `.config/ai/references/`
 
 Sync lifecycle:
 
@@ -94,4 +95,10 @@ Sync lifecycle:
 - `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
 - `sync-ai-config` depends on `yq` and `jq`.
 
-For agent authoring rules, supported frontmatter, and troubleshooting, see `.config/ai/agents/README.md`.
+Cost-control defaults:
+
+- Planning agent uses `openai/gpt-5.3-codex` for deep planning.
+- Execution/review agents default to `openai/gpt-5.1-codex-mini`.
+- Turn budgets are kept lower for executor agents to reduce token burn.
+
+For agent authoring rules, supported frontmatter, and troubleshooting, see `.config/ai/README.md`.
