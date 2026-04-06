@@ -8,6 +8,8 @@
       "Bash(pytest *)",
       "Bash(npm run *)",
       "Bash(bun *)",
+      "Bash(sync-ai-config)",
+      "Bash(sync-ai-config --check)",
       "Bash(git status)",
       "Bash(git diff *)",
       "Bash(git log *)",
@@ -19,6 +21,7 @@
       "Bash(git push --force *)"
     ]
   },
+  "model": "sonnet",
   "availableModels": [
     "haiku",
     "sonnet",
@@ -26,5 +29,6 @@
   ],
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true
-  }
+  },
+  "effortLevel": "medium"
 }

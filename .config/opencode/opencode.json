@@ -13,6 +13,8 @@
       "pytest *": "allow",
       "npm run *": "allow",
       "bun *": "allow",
+      "sync-ai-config": "allow",
+      "sync-ai-config --check": "allow",
       "git status": "allow",
       "git diff *": "allow",
       "git log *": "allow",

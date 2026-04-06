@@ -307,6 +307,7 @@ changed=0
 
 ensure_symlink "$home/.config/opencode/AGENTS.md" "$ai_root/AGENTS.md"
 ensure_symlink "$home/.config/opencode/skills" "$ai_root/skills"
+ensure_symlink "$home/.claude/skills" "$ai_root/skills"
 ensure_symlink "$home/.claude/plugins/local/skills" "$ai_root/skills"
 ensure_text_file "$home/.claude/CLAUDE.md" "@~/.config/ai/AGENTS.md"
 
