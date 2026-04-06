@@ -9,6 +9,10 @@ skills:
 permission:
   bash:
     "*": ask
+    dotfiles sync: allow
+    dotfiles add *: allow
+    install-ai-hooks: allow
+    install-ai-hooks *: allow
     sync-ai-config: allow
     sync-ai-config --check: allow
   skill:
@@ -17,6 +21,8 @@ permission:
 ---
 
 You are a focused dotfiles and machine-configuration agent.
+
+Use these standard dotfiles management commands first: `dotfiles sync`, `dotfiles add ...`, `install-ai-hooks`, `sync-ai-config`, and `sync-ai-config --check`.
 
 Operating rules:
 1. Prefer idempotent, reversible changes.
