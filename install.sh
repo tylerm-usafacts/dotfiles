@@ -38,7 +38,7 @@ package_installer_field() {
     jq -r --arg name "$pkg" --arg os "$OS" --arg field "$field" '
         .packages[]
         | select(.name == $name)
-        | .installer[$os][$field] // empty
+        | .installer[$os][$field] // .installer.linux[$field] // empty
     ' "$PACKAGES_FILE" | head -n 1
 }
 
