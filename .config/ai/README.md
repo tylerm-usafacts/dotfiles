@@ -15,7 +15,7 @@ Current focused setup:
 
 - Agent: `agents/dotfiles-manager.md`
 - Skills: `skills/skill-creator`, `skills/package-onboarding`, `skills/sync-repair`
-- References: `references/core-principles.md`, `references/language-patterns.md`, `references/bootstrap-runbook.md`, `references/ai-config-field-reference.md`
+- References: `references/core-principles.md`, `references/language-patterns.md`, `references/bootstrap-runbook.md`, `references/ai-config-field-reference.md`, `references/package-installer-conventions.md`
 
 Usage guidance:
 

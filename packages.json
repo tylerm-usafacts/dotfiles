@@ -29,6 +29,13 @@
       }
     },
     {
+      "name": "gh-dash",
+      "installer": {
+        "macos": { "type": "custom", "function": "install_macos_gh_dash" },
+        "linux": { "type": "custom", "function": "install_linux_gh_dash" }
+      }
+    },
+    {
       "name": "jq",
       "installer": {
         "macos": { "type": "brew" },

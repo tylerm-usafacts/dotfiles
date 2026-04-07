@@ -116,6 +116,20 @@ is_core_dependency() {
     esac
 }
 
+install_gh_dash() {
+    if ! command -v gh &>/dev/null; then
+        echo "gh-dash install requires gh"
+        return 1
+    fi
+
+    if gh extension list | grep -qE '(^|[[:space:]])dlvhdr/gh-dash([[:space:]]|$)'; then
+        return 0
+    fi
+
+    echo "Installing gh-dash..."
+    gh extension install dlvhdr/gh-dash
+}
+
 # ─── macOS ───────────────────────────────────────────────────────────────────
 
 install_macos() {
@@ -135,6 +149,10 @@ install_macos() {
         is_core_dependency "$pkg" && continue
         install_package "$pkg"
     done < <(package_names)
+}
+
+install_macos_gh_dash() {
+    install_gh_dash
 }
 
 # ─── Linux ───────────────────────────────────────────────────────────────────
@@ -252,6 +270,10 @@ install_linux_starship() {
     command -v starship &>/dev/null && return
     echo "Installing starship..."
     curl -sS https://starship.rs/install.sh | sh -s -- --yes
+}
+
+install_linux_gh_dash() {
+    install_gh_dash
 }
 
 is_container_runtime() {
