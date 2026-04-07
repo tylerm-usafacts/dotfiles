@@ -67,8 +67,8 @@
     },
     "background": "none",
     "backgroundPanel": {
-      "dark": "macMantle",
-      "light": "macMantle"
+      "dark": "macCrust",
+      "light": "macCrust"
     },
     "backgroundElement": {
       "dark": "macCrust",
