@@ -1,4 +1,7 @@
 export PATH=~/.local/bin:$PATH
+export EDITOR="nvim"
+export VISUAL="nvim"
+export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml"
 
 # starship set location of config + init on shell
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
