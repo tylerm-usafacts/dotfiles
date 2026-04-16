@@ -32,8 +32,6 @@ return {
 ██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║
 ██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║
 ╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
-
-      dotfiles cockpit
 ]],
           -- stylua: ignore
           keys = {
@@ -50,8 +48,8 @@ return {
           },
         },
         sections = {
-          { section = 'header', padding = 1 },
-          { section = 'keys', gap = 1, padding = 1 },
+          { section = 'header' },
+          { section = 'keys' },
           { section = 'startup' },
         },
       },

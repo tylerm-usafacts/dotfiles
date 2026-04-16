@@ -22,7 +22,9 @@ return {
       {
         '<leader>sn',
         function()
-          require('snacks').picker.files { cwd = vim.fn.stdpath 'config' }
+          local uv = vim.uv or vim.loop
+          local config_dir = uv.fs_realpath(vim.fn.stdpath 'config') or vim.fn.stdpath 'config'
+          require('snacks').picker.files { cwd = config_dir, follow = true }
         end,
         desc = '[S]earch [N]eovim files',
       },
