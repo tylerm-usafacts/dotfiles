@@ -20,6 +20,41 @@ return {
           grep = { hidden = true },
         },
       },
+      dashboard = {
+        enabled = true,
+        width = 60,
+        pane_gap = 4,
+        preset = {
+          header = [[
+███╗   ██╗██╗   ██╗██╗███╗   ███╗
+████╗  ██║██║   ██║██║████╗ ████║
+██╔██╗ ██║██║   ██║██║██╔████╔██║
+██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║
+██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║
+╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
+
+      dotfiles cockpit
+]],
+          -- stylua: ignore
+          keys = {
+            { icon = ' ', key = 'f', desc = 'Search Files',                              action = '<leader>sf' },
+            { icon = ' ', key = 'g', desc = 'Search by Grep',                            action = '<leader>sg' },
+            { icon = '󰱼 ', key = '/', desc = 'Search in Current Buffer',                  action = '<leader>/' },
+            { icon = ' ', key = 'b', desc = 'Find Existing Buffers',                     action = '<leader><leader>' },
+            { icon = ' ', key = 'n', desc = 'Search Neovim Files',                       action = '<leader>sn' },
+            { icon = ' ', key = 'e', desc = 'Toggle Explorer',                           action = '\\' },
+            { icon = ' ', key = 'h', desc = 'Notification History',                      action = '<leader>nn' },
+            { icon = ' ', key = 'd', desc = 'Dismiss Notifications',                     action = '<leader>nd' },
+            { icon = ' ', key = 'l', desc = 'Open LazyGit',                              action = '<leader>lg' },
+            { icon = ' ', key = 'q', desc = 'Quit',                                      action = ':qa' },
+          },
+        },
+        sections = {
+          { section = 'header', padding = 1 },
+          { section = 'keys', gap = 1, padding = 1 },
+          { section = 'startup' },
+        },
+      },
       notifier = { enabled = true },
       explorer = { enabled = true },
       indent = { enabled = true },
@@ -74,6 +109,7 @@ return {
     },
     config = function(_, opts)
       require('catppuccin').setup(opts)
+      local palette = require('catppuccin.palettes').get_palette 'macchiato'
       vim.cmd.colorscheme 'catppuccin-macchiato'
       vim.api.nvim_set_hl(0, 'MsgArea', { bg = 'none' })
       vim.api.nvim_set_hl(0, 'NormalFloat', { bg = 'none' })
@@ -96,9 +132,22 @@ return {
         'SnacksPickerPreview',
         'SnacksPickerPreviewNormal',
         'SnacksPickerPreviewBorder',
+        'SnacksDashboardNormal',
+        'SnacksDashboardDesc',
+        'SnacksDashboardIcon',
+        'SnacksDashboardKey',
+        'SnacksDashboardDir',
+        'SnacksDashboardHeader',
+        'SnacksDashboardFooter',
       } do
         vim.api.nvim_set_hl(0, group, { bg = 'none' })
       end
+
+      vim.api.nvim_set_hl(0, 'SnacksDashboardHeader', { bg = 'none', fg = palette.blue, bold = true })
+      vim.api.nvim_set_hl(0, 'SnacksDashboardDesc', { bg = 'none', fg = palette.text })
+      vim.api.nvim_set_hl(0, 'SnacksDashboardIcon', { bg = 'none', fg = palette.teal })
+      vim.api.nvim_set_hl(0, 'SnacksDashboardKey', { bg = 'none', fg = palette.mauve, bold = true })
+      vim.api.nvim_set_hl(0, 'SnacksDashboardFooter', { bg = 'none', fg = palette.surface2, italic = true })
     end,
   },
 
