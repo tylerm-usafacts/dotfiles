@@ -3,6 +3,29 @@ set -e
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES_FILE="$DOTFILES_DIR/packages.json"
+MODE="install"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --mode)
+            if [[ $# -lt 2 ]]; then
+                echo "Missing value for --mode"
+                exit 1
+            fi
+            MODE="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+done
+
+if [[ "$MODE" != "install" && "$MODE" != "upgrade" ]]; then
+    echo "Unsupported mode: $MODE"
+    exit 1
+fi
 
 # ─── OS Detection ────────────────────────────────────────────────────────────
 
@@ -20,6 +43,10 @@ detect_os() {
 
 OS=$(detect_os)
 echo "Detected OS: $OS"
+echo "Mode: $MODE"
+
+BREW_UPDATED=0
+APT_UPDATED=0
 
 ensure_packages_file() {
     if [[ ! -f "$PACKAGES_FILE" ]]; then
@@ -108,6 +135,128 @@ install_package() {
     esac
 }
 
+ensure_brew_updated() {
+    if [[ "$BREW_UPDATED" -eq 0 ]]; then
+        brew update
+        BREW_UPDATED=1
+    fi
+}
+
+ensure_apt_updated() {
+    if [[ "$APT_UPDATED" -eq 0 ]]; then
+        sudo apt update -y
+        APT_UPDATED=1
+    fi
+}
+
+brew_formula_installed() {
+    local formula="$1"
+    brew list --formula "$formula" >/dev/null 2>&1
+}
+
+apt_package_installed() {
+    local pkg="$1"
+    dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "ok installed"
+}
+
+upgrade_package() {
+    local pkg="$1"
+    local type detect_cmd install_cmd upgrade_cmd fn upgrade_fn formula apt_pkg
+
+    type=$(package_installer_field "$pkg" type)
+    if [[ -z "$type" ]]; then
+        echo "Missing installer.${OS}.type for package: $pkg"
+        return 1
+    fi
+
+    case "$type" in
+        native)
+            upgrade_cmd=$(package_installer_field "$pkg" upgrade)
+            install_cmd=$(package_installer_field "$pkg" install)
+            detect_cmd=$(package_installer_field "$pkg" detect)
+
+            if [[ -n "$upgrade_cmd" ]]; then
+                echo "Upgrading ${pkg} via native upgrade command..."
+                bash -lc "$upgrade_cmd"
+                return
+            fi
+
+            if [[ -z "$install_cmd" || -z "$detect_cmd" ]]; then
+                echo "native installer for $pkg requires install and detect"
+                return 1
+            fi
+
+            echo "No native upgrade command for ${pkg}; falling back to install command..."
+            bash -lc "$install_cmd"
+
+            if ! bash -lc "$detect_cmd"; then
+                echo "Native install fallback failed for ${pkg}"
+                return 1
+            fi
+            ;;
+        custom)
+            upgrade_fn=$(package_installer_field "$pkg" upgrade_function)
+            fn=$(package_installer_field "$pkg" function)
+
+            if [[ -n "$upgrade_fn" ]]; then
+                if ! type "$upgrade_fn" &>/dev/null; then
+                    echo "custom upgrade function not found for $pkg: $upgrade_fn"
+                    return 1
+                fi
+
+                echo "Upgrading ${pkg} via custom upgrade function..."
+                "$upgrade_fn"
+                return
+            fi
+
+            if [[ -z "$fn" ]]; then
+                echo "custom installer for $pkg requires function"
+                return 1
+            fi
+
+            if ! type "$fn" &>/dev/null; then
+                echo "custom installer function not found for $pkg: $fn"
+                return 1
+            fi
+
+            echo "No custom upgrade function for ${pkg}; falling back to install function..."
+            "$fn"
+            ;;
+        brew)
+            formula=$(package_installer_field "$pkg" formula)
+            [[ -z "$formula" ]] && formula="$pkg"
+
+            if ! brew_formula_installed "$formula"; then
+                echo "Skipping ${pkg}: brew formula not installed (${formula})"
+                return 0
+            fi
+
+            ensure_brew_updated
+            brew upgrade "$formula"
+            ;;
+        apt)
+            apt_pkg=$(package_installer_field "$pkg" package)
+            [[ -z "$apt_pkg" ]] && apt_pkg="$pkg"
+
+            if ! apt_package_installed "$apt_pkg"; then
+                echo "Skipping ${pkg}: apt package not installed (${apt_pkg})"
+                return 0
+            fi
+
+            ensure_apt_updated
+            echo "Upgrading ${pkg} via apt..."
+            sudo apt install --only-upgrade -y "$apt_pkg"
+            ;;
+        skip)
+            return 0
+            ;;
+        *)
+            echo "Unsupported installer type for $pkg on $OS: $type"
+            return 1
+            ;;
+    esac
+}
+
 is_core_dependency() {
     local pkg="$1"
     case "$pkg" in
@@ -143,11 +292,20 @@ install_macos() {
     echo "Installing core dependencies (jq, yq)..."
     brew install jq yq
 
-    echo "Installing packages via Homebrew..."
+    if [[ "$MODE" == "install" ]]; then
+        echo "Installing packages via Homebrew..."
+    else
+        echo "Upgrading managed packages via Homebrew..."
+    fi
+
     while IFS= read -r pkg; do
         [[ -z "$pkg" ]] && continue
-        is_core_dependency "$pkg" && continue
-        install_package "$pkg"
+        if [[ "$MODE" == "install" ]]; then
+            is_core_dependency "$pkg" && continue
+            install_package "$pkg"
+        else
+            upgrade_package "$pkg"
+        fi
     done < <(package_names)
 }
 
@@ -470,6 +628,15 @@ install_linux_via_apt() {
 install_linux() {
     ensure_packages_file
 
+    if [[ "$MODE" == "upgrade" ]]; then
+        echo "Upgrading managed packages on Linux..."
+        while IFS= read -r pkg; do
+            [[ -z "$pkg" ]] && continue
+            upgrade_package "$pkg"
+        done < <(package_names)
+        return
+    fi
+
     echo "Updating system packages..."
     sudo apt update -y
     if is_container_runtime && [[ "${DOTFILES_APT_UPGRADE:-}" != "1" ]]; then
@@ -514,6 +681,11 @@ case "$OS" in
         exit 1
         ;;
 esac
+
+if [[ "$MODE" == "upgrade" ]]; then
+    echo "Done!"
+    exit 0
+fi
 
 # ─── Stow dotfiles ────────────────────────────────────────────────────────────
 # Pre-create directories that contain a mix of stow-managed and runtime files.

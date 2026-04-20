@@ -7,6 +7,7 @@ usage() {
   echo ""
   echo "Commands:"
   echo "  sync                                 Run dotfiles installer"
+  echo "  upgrade                              Upgrade managed packages"
   echo "  add <package> [--native <script>] [--detect <script>]"
 }
 
@@ -171,6 +172,9 @@ add_package() {
 case "${1:-}" in
   sync)
     exec bash "$HOME/dotfiles/install.sh"
+    ;;
+  upgrade)
+    exec bash "$HOME/dotfiles/install.sh" --mode upgrade
     ;;
   add)
     shift

@@ -83,12 +83,14 @@
         "macos": {
           "type": "native",
           "detect": "test -d \"$HOME/.local/share/claude/versions\"",
-          "install": "curl -fsSL https://claude.ai/install.sh | bash"
+          "install": "curl -fsSL https://claude.ai/install.sh | bash",
+          "upgrade": "claude upgrade"
         },
         "linux": {
           "type": "native",
           "detect": "test -d \"$HOME/.local/share/claude/versions\"",
-          "install": "curl -fsSL https://claude.ai/install.sh | bash"
+          "install": "curl -fsSL https://claude.ai/install.sh | bash",
+          "upgrade": "claude upgrade"
         }
       }
     },
@@ -98,12 +100,14 @@
         "macos": {
           "type": "native",
           "detect": "test -x \"$HOME/.opencode/bin/opencode\"",
-          "install": "curl -fsSL https://opencode.ai/install | bash"
+          "install": "curl -fsSL https://opencode.ai/install | bash",
+          "upgrade": "opencode upgrade"
         },
         "linux": {
           "type": "native",
           "detect": "test -x \"$HOME/.opencode/bin/opencode\"",
-          "install": "curl -fsSL https://opencode.ai/install | bash"
+          "install": "curl -fsSL https://opencode.ai/install | bash",
+          "upgrade": "opencode upgrade"
         }
       }
     },

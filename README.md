@@ -74,9 +74,23 @@ To add a new tool, use the CLI:
 dotfiles add <package>
 dotfiles add <package> --native "<install script>" --detect "<detect command>"
 dotfiles sync
+dotfiles upgrade
 ```
 
 Native package metadata lives with the package entry in `packages.json`.
+
+Command behavior:
+
+- `dotfiles sync`: install missing packages, then stow dotfiles and run `sync-ai-config`
+- `dotfiles upgrade`: upgrade only packages declared in `packages.json` (managed-only), without stow or AI config sync
+
+Managed-only upgrade strategy by installer type:
+
+- `brew`: `brew update` once, then `brew upgrade <formula>` for managed formulae that are already installed
+- `apt`: `apt update` once, then `apt install --only-upgrade` for managed packages that are already installed
+- `native`: run `installer.<os>.upgrade` when defined; otherwise fallback to `install`
+- `custom`: run `installer.<os>.upgrade_function` when defined; otherwise fallback to `function`
+- `skip`: no-op
 
 ## AI agent config
 
