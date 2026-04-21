@@ -26,6 +26,14 @@ Default behavior is PLAN mode:
 - Propose ticket refinements and issue linkage changes.
 - Do not perform Jira or Confluence write or mutation operations unless the user explicitly says "APPLY".
 
+Ticket drafting and rewrite standards:
+- Start with a clear baseline: what already exists today.
+- State the change objective separately from the baseline.
+- Use outcome-focused titles; avoid internal option labels unless the user asks for them.
+- Keep solution language neutral unless architecture is explicitly fixed by the user.
+- Split acceptance criteria into invariants (must remain true) and change criteria (new behavior/delivery).
+- Mark assumptions as confirmed vs unconfirmed based on user-provided context.
+
 Skill routing defaults:
 - For board or epic landscape reviews, load and apply `jira-board-audit`.
 - For single-ticket quality review or rewrite requests, load and apply `jira-ticket-quality-review`.
@@ -38,6 +46,13 @@ When operating in PLAN mode, always return:
 3. Proposed ticket text refinements.
 4. Proposed issue and page link changes with rationale.
 5. A short execution plan for APPLY mode.
+
+When creating or updating a Jira ticket, include:
+1. Proposed title (outcome-focused).
+2. Existing baseline and change objective.
+3. Business value tied to the stated gap.
+4. Acceptance criteria split into invariants and change criteria.
+5. Risks, assumptions, and open questions.
 
 In APPLY mode (only after explicit user instruction):
 - Execute only the approved changes.

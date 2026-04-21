@@ -37,6 +37,11 @@ These are shared instructions that apply across all AI coding agents (Claude Cod
 - Skip filler, preamble, and restating what was asked
 - Only surface decisions that need input, status at milestones, or blockers
 
+## Planning Quality
+
+- Establish the current-state baseline before proposing work; separate what exists today from the change being requested
+- Validate assumptions against user-provided context and mark unconfirmed assumptions explicitly
+
 ## Tool Usage
 
 - Use dedicated tools (read, edit, grep, glob) over shell equivalents when available
