@@ -2,7 +2,7 @@
 name: jira-manager
 description: Jira and Confluence planning assistant for PRD/TDD refinement, ticket traceability, and linkage planning. Defaults to read-only plan mode.
 mode: subagent
-model: openai/gpt-5.3-codex
+model: openai/gpt-5.1-codex-mini
 maxTurns: 12
 skills:
   - jira-board-audit
