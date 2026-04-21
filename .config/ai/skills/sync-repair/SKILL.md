@@ -5,7 +5,7 @@ description: Repairs AI config sync drift and validates generated outputs.
 
 # Sync Repair
 
-Use this skill when `sync-ai-config --check` fails or generated agent files drift.
+Use this skill when `sync-ai-config --check` fails, generated agent files drift, or MCP render targets drift (`opencode` `mcp` block / `.mcp.json`).
 
 ## Procedure
 
@@ -16,6 +16,7 @@ Use this skill when `sync-ai-config --check` fails or generated agent files drif
    - Run `git status` and `git diff`.
    - Confirm dependencies: `jq --version`, `yq --version`.
    - If needed, run `opencode agent list` to inspect generated OpenCode output.
+   - If MCP config was touched, run `opencode mcp list` and `claude mcp list` to confirm rendered server presence and auth state.
 
 3. Reconcile canonical to generated outputs.
    - Run `sync-ai-config`.

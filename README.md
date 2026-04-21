@@ -31,7 +31,8 @@ The script detects your OS and handles everything automatically:
 │   ├── ai/                    # Shared AI agent instructions
 │   │   ├── AGENTS.md          # Instructions used by both Claude Code and OpenCode
 │   │   ├── skills/            # Shared skills (both systems pick these up)
-│   │   └── agents/            # Shared custom agent definitions (single source)
+│   │   ├── agents/            # Shared custom agent definitions (single source)
+│   │   └── mcp/               # Shared MCP server definitions (single source)
 │   ├── opencode/              # OpenCode configuration
 │   │   ├── opencode.json      # Settings and permissions
 │   │   ├── AGENTS.md          # -> ../ai/AGENTS.md (symlink)
@@ -100,12 +101,17 @@ AI instructions, skills, and custom agents use `.config/ai/` as the source of tr
 - Shared skills: `.config/ai/skills/`
 - Shared custom agents: `.config/ai/agents/*.md` (canonical YAML frontmatter + markdown prompt)
 - Shared references: `.config/ai/references/`
+- Shared MCP server definitions: `.config/ai/mcp/servers.json`
 
 Sync lifecycle:
 
 - `sync-ai-config` publishes custom agents to tool-native locations:
   - `~/.claude/agents/*.md`
   - `~/.config/opencode/agents/*.md`
+- `sync-ai-config` publishes MCP server config from `.config/ai/mcp/servers.json` to:
+  - `~/.config/opencode/opencode.json` (`mcp` block)
+  - `~/dotfiles/.mcp.json` (`mcpServers` for Claude project scope)
+- MCP DSL mapping reference: `.config/ai/references/mcp-dsl-mapping.md`
 - `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
 - `sync-ai-config` depends on `yq` and `jq`.
 

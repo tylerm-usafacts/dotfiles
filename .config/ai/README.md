@@ -8,6 +8,7 @@ This directory is the canonical source for AI configuration shared across Claude
 - `agents/*.md` - custom agent definitions (canonical source)
 - `skills/*/SKILL.md` - reusable process skills
 - `references/*.md` - checklists and operational reference docs
+- `mcp/servers.json` - canonical MCP server definitions
 
 ## Dotfiles-manager stack
 
@@ -15,7 +16,7 @@ Current focused setup:
 
 - Agent: `agents/dotfiles-manager.md`
 - Skills: `skills/skill-creator`, `skills/package-onboarding`, `skills/sync-repair`
-- References: `references/core-principles.md`, `references/language-patterns.md`, `references/bootstrap-runbook.md`, `references/ai-config-field-reference.md`, `references/package-installer-conventions.md`
+- References: `references/core-principles.md`, `references/language-patterns.md`, `references/bootstrap-runbook.md`, `references/ai-config-field-reference.md`, `references/package-installer-conventions.md`, `references/mcp-config-reference.md`, `references/mcp-dsl-mapping.md`
 
 Usage guidance:
 
@@ -57,6 +58,14 @@ Run:
 
 - `sync-ai-config` to apply changes
 - `sync-ai-config --check` to detect drift
+
+MCP sync behavior:
+
+- Canonical MCP source: `.config/ai/mcp/servers.json`
+- OpenCode target: `~/.config/opencode/opencode.json` (`mcp` block)
+- Claude target: `~/dotfiles/.mcp.json` (`mcpServers`)
+- OAuth credentials and auth caches remain runtime state and are not source files.
+- Mapping reference: `.config/ai/references/mcp-dsl-mapping.md`
 
 Sync output locations:
 

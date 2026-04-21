@@ -21,6 +21,13 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command '$1'"
 }
 
+read_file_if_exists() {
+  local path="$1"
+  if [[ -f "$path" ]]; then
+    cat "$path"
+  fi
+}
+
 resolve_path_for_compare() {
   local value="$1"
   local base_dir="$2"
@@ -275,6 +282,130 @@ sync_directory() {
   done
 }
 
+build_opencode_mcp_json() {
+  local source_json_file="$1"
+
+  jq -c '
+    .mcpServers
+    | with_entries(
+        .value = (
+          if .value.type == "stdio" then
+            {
+              type: "local",
+              command: (
+                if (.value.command | type) == "array" then
+                  .value.command
+                else
+                  [ .value.command ] + (.value.args // [])
+                end
+              )
+            }
+            + (if .value.env then { environment: .value.env } else {} end)
+            + (if .value.enabled != null then { enabled: .value.enabled } else {} end)
+            + (if .value.timeout != null then { timeout: .value.timeout } else {} end)
+          elif (.value.type == "http" or .value.type == "sse") then
+            {
+              type: "remote",
+              url: .value.url
+            }
+            + (if .value.enabled != null then { enabled: .value.enabled } else {} end)
+            + (if .value.headers then { headers: .value.headers } else {} end)
+            + (if .value.oauth != null then { oauth: .value.oauth } else {} end)
+            + (if .value.timeout != null then { timeout: .value.timeout } else {} end)
+          elif (.value.type == "remote" or .value.type == "local") then
+            .value
+          else
+            .value
+          end
+        )
+      )
+  ' "$source_json_file"
+}
+
+build_claude_mcp_json() {
+  local source_json_file="$1"
+
+  jq -c '
+    .mcpServers
+    | with_entries(
+        .value = (
+          .value
+          | del(.enabled)
+          | if (.type == "stdio" and (.command | type) == "array") then
+              {
+                type: "stdio",
+                command: .command[0],
+                args: .command[1:]
+              }
+              + (if .env then { env: .env } else {} end)
+            else
+              .
+            end
+        )
+      )
+    | { mcpServers: . }
+  ' "$source_json_file"
+}
+
+sync_mcp_configs() {
+  local source_file="$1"
+  local opencode_config_file="$2"
+  local claude_project_mcp_file="$3"
+
+  if [[ ! -f "$source_file" ]]; then
+    return
+  fi
+
+  if ! jq -e '.mcpServers | type == "object"' "$source_file" >/dev/null 2>&1; then
+    fail "$source_file: missing required object key 'mcpServers'"
+  fi
+
+  if ! jq -e '
+    .mcpServers
+    | to_entries
+    | all(
+        .[];
+        (
+          (.value.type == "http" or .value.type == "sse") and (.value.url | type == "string")
+        )
+        or
+        (
+          .value.type == "stdio" and
+          (
+            (.value.command | type == "string")
+            or
+            ((.value.command | type == "array") and (.value.command | length > 0))
+          )
+        )
+      )
+  ' "$source_file" >/dev/null 2>&1; then
+    fail "$source_file: each server requires valid type-specific fields"
+  fi
+
+  local opencode_mcp_json
+  opencode_mcp_json="$(build_opencode_mcp_json "$source_file")"
+
+  local opencode_current_json
+  opencode_current_json="$(read_file_if_exists "$opencode_config_file")"
+  if [[ -z "$opencode_current_json" ]]; then
+    opencode_current_json='{}'
+  fi
+
+  if ! printf '%s' "$opencode_current_json" | jq empty >/dev/null 2>&1; then
+    fail "$opencode_config_file: invalid JSON"
+  fi
+
+  local opencode_expected_json
+  opencode_expected_json="$(printf '%s' "$opencode_current_json" | jq --argjson mcp "$opencode_mcp_json" '. + { mcp: $mcp }')"
+  opencode_expected_json="$(printf '%s' "$opencode_expected_json" | jq '.')"
+  ensure_text_file "$opencode_config_file" "$opencode_expected_json"
+
+  local claude_mcp_expected_json
+  claude_mcp_expected_json="$(build_claude_mcp_json "$source_file")"
+  claude_mcp_expected_json="$(printf '%s' "$claude_mcp_expected_json" | jq '.')"
+  ensure_text_file "$claude_project_mcp_file" "$claude_mcp_expected_json"
+}
+
 if (( $# > 1 )); then
   usage
   exit 1
@@ -299,9 +430,21 @@ fi
 home="$HOME"
 ai_root="$home/.config/ai"
 source_agents_dir="$ai_root/agents"
+source_mcp_file="$ai_root/mcp/servers.json"
+
+dotfiles_root=""
+script_realpath="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$0" 2>/dev/null || true)"
+if [[ -n "$script_realpath" ]]; then
+  dotfiles_root="$(cd "$(dirname "$script_realpath")/../.." >/dev/null 2>&1 && pwd -P || true)"
+fi
+if [[ -z "$dotfiles_root" ]]; then
+  dotfiles_root="$home/dotfiles"
+fi
 
 opencode_agents_dir="$home/.config/opencode/agents"
 claude_agents_dir="$home/.claude/agents"
+opencode_config_file="$home/.config/opencode/opencode.json"
+claude_project_mcp_file="$dotfiles_root/.mcp.json"
 
 changed=0
 
@@ -310,6 +453,7 @@ ensure_symlink "$home/.config/opencode/skills" "$ai_root/skills"
 ensure_symlink "$home/.claude/skills" "$ai_root/skills"
 ensure_symlink "$home/.claude/plugins/local/skills" "$ai_root/skills"
 ensure_text_file "$home/.claude/CLAUDE.md" "@~/.config/ai/AGENTS.md"
+sync_mcp_configs "$source_mcp_file" "$opencode_config_file" "$claude_project_mcp_file"
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
