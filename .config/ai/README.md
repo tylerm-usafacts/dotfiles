@@ -10,6 +10,12 @@ This directory is the canonical source for AI configuration shared across Claude
 - `references/*.md` - checklists and operational reference docs
 - `mcp/servers.json` - canonical MCP server definitions
 
+## Document placement rules
+
+- Keep skill-specific assets next to the skill in `skills/<skill-name>/`.
+- Use `references/` for cross-skill docs and larger lookup material.
+- If a skill depends on a doc in `references/`, link it with an explicit relative path.
+
 ## Dotfiles-manager stack
 
 Current focused setup:
