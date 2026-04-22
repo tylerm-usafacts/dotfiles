@@ -7,14 +7,48 @@ This directory is the canonical source for AI configuration shared across Claude
 - `AGENTS.md` - shared behavioral instructions loaded by both tools
 - `agents/*.md` - custom agent definitions (canonical source)
 - `skills/*/SKILL.md` - reusable process skills
-- `references/*.md` - checklists and operational reference docs
+- `docs/policies/*.md` - always-on rules and guardrails
+- `docs/runbooks/*.md` - operational procedures and troubleshooting steps
+- `docs/references/*.md` - lookup docs, schemas, and mappings
+- `docs/doc-classification-rubric.md` - guide for placing new docs
 - `mcp/servers.json` - canonical MCP server definitions
 
 ## Document placement rules
 
 - Keep skill-specific assets next to the skill in `skills/<skill-name>/`.
-- Use `references/` for cross-skill docs and larger lookup material.
-- If a skill depends on a doc in `references/`, link it with an explicit relative path.
+- Use `docs/policies/` for normative guidance that should always apply.
+- Use `docs/runbooks/` for step-by-step operational procedures.
+- Use `docs/references/` for lookup material and field mappings.
+- If a skill depends on a shared document, link it with an explicit relative path.
+
+## Documentation index
+
+Policies:
+
+- `docs/policies/code-changes.md`
+- `docs/policies/style-and-comments.md`
+- `docs/policies/git-and-safety.md`
+- `docs/policies/communication-and-planning.md`
+- `docs/policies/tool-usage.md`
+
+Runbooks:
+
+- `docs/runbooks/sync-and-bootstrap.md`
+- `docs/runbooks/mcp-troubleshooting.md`
+- `docs/runbooks/package-onboarding-validation.md`
+
+References:
+
+- `docs/references/ai-config-field-reference.md`
+- `docs/references/core-principles.md`
+- `docs/references/language-patterns.md`
+- `docs/references/mcp-config-reference.md`
+- `docs/references/mcp-dsl-mapping.md`
+- `docs/references/package-installer-conventions.md`
+
+Classification:
+
+- `docs/doc-classification-rubric.md`
 
 ## Dotfiles-manager stack
 
@@ -22,13 +56,15 @@ Current focused setup:
 
 - Agent: `agents/dotfiles-manager.md`
 - Skills: `skills/skill-creator`, `skills/package-onboarding`, `skills/sync-repair`
-- References: `references/core-principles.md`, `references/language-patterns.md`, `references/bootstrap-runbook.md`, `references/ai-config-field-reference.md`, `references/package-installer-conventions.md`, `references/mcp-config-reference.md`, `references/mcp-dsl-mapping.md`
+- References: `docs/references/core-principles.md`, `docs/references/language-patterns.md`, `docs/references/ai-config-field-reference.md`, `docs/references/package-installer-conventions.md`, `docs/references/mcp-config-reference.md`, `docs/references/mcp-dsl-mapping.md`
+- Runbooks: `docs/runbooks/sync-and-bootstrap.md`, `docs/runbooks/mcp-troubleshooting.md`
 
 Usage guidance:
 
-- Keep broad behavior and guardrails in the agent definition.
+- Keep root `AGENTS.md` minimal and stable; place broad guardrails in `docs/policies/`.
 - Keep procedural workflows in skills.
 - Keep larger lookup material in references and load only when needed.
+- Keep ordered operational command sequences in runbooks.
 
 ## Custom agent authoring
 
@@ -71,7 +107,7 @@ MCP sync behavior:
 - OpenCode target: `~/.config/opencode/opencode.json` (`mcp` block)
 - Claude target: `~/dotfiles/.mcp.json` (`mcpServers`)
 - OAuth credentials and auth caches remain runtime state and are not source files.
-- Mapping reference: `.config/ai/references/mcp-dsl-mapping.md`
+- Mapping reference: `.config/ai/docs/references/mcp-dsl-mapping.md`
 
 Sync output locations:
 

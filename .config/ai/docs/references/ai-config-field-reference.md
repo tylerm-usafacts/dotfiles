@@ -17,7 +17,7 @@ Use this reference when editing `.config/ai/agents/*.md` and validating sync beh
 - `model`: chosen model id.
 - `maxTurns`: canonical turn budget.
 - `skills`: explicit skill allowlist for the agent.
-- `permission`: command/tool policy.
+- `permission`: command and tool policy.
 
 ## Field Mapping Behavior
 
@@ -26,42 +26,8 @@ Use this reference when editing `.config/ai/agents/*.md` and validating sync beh
 - `maxTurns -> steps` for OpenCode output.
 - `steps -> maxTurns` for Claude output.
 
-If only one side is set, sync fills the other side for generated output.
-
-## Permission Patterns
-
-Use explicit allows for safe recurring commands, keep wildcard as ask:
-
-- `permission.bash."*": ask`
-- add narrow command patterns for routine operations.
-
-Examples:
-
-- `dotfiles sync: allow`
-- `sync-ai-config --check: allow`
-- `git diff*: allow`
-
-For skill loading policy:
-
-- `permission.skill."*": ask`
-- allow only known skills the agent should use.
-
 ## Generated Output Rules
 
 - Generated files include the sync marker.
 - Generated outputs are not source files.
 - Drift should be fixed by sync, not by editing generated files.
-
-## Validation Workflow
-
-1. Edit canonical source.
-2. Run `sync-ai-config`.
-3. Run `sync-ai-config --check`.
-4. Confirm expected changes with `git status` and `git diff`.
-
-## Common Mistakes
-
-- Missing `name` or `description` in frontmatter.
-- Using unsupported `yq` variant.
-- Editing generated output directly.
-- Broad permissions where narrow patterns are sufficient.

@@ -100,7 +100,7 @@ AI instructions, skills, and custom agents use `.config/ai/` as the source of tr
 - Shared instructions: `.config/ai/AGENTS.md`
 - Shared skills: `.config/ai/skills/`
 - Shared custom agents: `.config/ai/agents/*.md` (canonical YAML frontmatter + markdown prompt)
-- Shared references: `.config/ai/references/`
+- Shared documentation: `.config/ai/docs/` (`policies/`, `runbooks/`, `references/`)
 - Shared MCP server definitions: `.config/ai/mcp/servers.json`
 
 Sync lifecycle:
@@ -111,7 +111,7 @@ Sync lifecycle:
 - `sync-ai-config` publishes MCP server config from `.config/ai/mcp/servers.json` to:
   - `~/.config/opencode/opencode.json` (`mcp` block)
   - `~/dotfiles/.mcp.json` (`mcpServers` for Claude project scope)
-- MCP DSL mapping reference: `.config/ai/references/mcp-dsl-mapping.md`
+- MCP DSL mapping reference: `.config/ai/docs/references/mcp-dsl-mapping.md`
 - `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
 - `sync-ai-config` depends on `yq` and `jq`.
 
