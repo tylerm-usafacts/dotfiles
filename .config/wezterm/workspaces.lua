@@ -34,8 +34,8 @@ local function apply_dev_layout(mux_window, cwd)
 
   top_pane:send_text 'nvim\n'
   top_pane:split {
-    direction = 'Bottom',
-    size = 0.35,
+    direction = 'Right',
+    size = 0.30,
     cwd = cwd,
   }
 
