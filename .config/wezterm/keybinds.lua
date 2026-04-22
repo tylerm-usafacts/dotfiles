@@ -1,6 +1,7 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
 local workspace_switcher = wezterm.plugin.require 'https://github.com/MLFlexer/smart_workspace_switcher.wezterm'
+local workspaces = require 'workspaces'
 
 local M = {}
 
@@ -71,26 +72,7 @@ M.keys = {
     key = 'n',
     mods = 'SUPER',
     action = wezterm.action_callback(function(window, pane)
-      local cwd_uri = pane:get_current_working_dir()
-      if not cwd_uri or not cwd_uri.file_path or cwd_uri.file_path == '' then
-        return
-      end
-
-      local cwd = cwd_uri.file_path
-      local workspace_name = cwd:gsub('[/\\]+$', ''):gsub('(.*[/\\])(.*)', '%2')
-      if workspace_name == '' then
-        workspace_name = cwd
-      end
-
-      window:perform_action(
-        act.SwitchToWorkspace {
-          name = workspace_name,
-          spawn = {
-            cwd = cwd,
-          },
-        },
-        pane
-      )
+      workspaces.switch_or_create_dev_layout(window, pane)
     end),
   },
 }

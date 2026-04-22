@@ -1,4 +1,12 @@
 export PATH=~/.local/bin:$PATH
+
+if [ "$(uname -s 2>/dev/null)" = "Linux" ]; then
+  case ":$PATH:" in
+    *":/usr/local/bin:"*) ;;
+    *) export PATH="/usr/local/bin:$PATH" ;;
+  esac
+fi
+
 export EDITOR="nvim"
 export VISUAL="nvim"
 export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml"

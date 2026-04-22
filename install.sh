@@ -625,8 +625,16 @@ install_linux_via_apt() {
     fi
 }
 
+ensure_linux_usr_local_bin_path() {
+    case ":$PATH:" in
+        *":/usr/local/bin:"*) ;;
+        *) export PATH="/usr/local/bin:$PATH" ;;
+    esac
+}
+
 install_linux() {
     ensure_packages_file
+    ensure_linux_usr_local_bin_path
 
     if [[ "$MODE" == "upgrade" ]]; then
         echo "Upgrading managed packages on Linux..."
