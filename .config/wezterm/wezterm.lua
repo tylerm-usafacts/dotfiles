@@ -13,12 +13,17 @@ wezterm.on('format-tab-title', function(tab)
     end
   end
 
-  local cwd = wezterm.format {
-    { Text = utils.get_current_working_dir(tab) },
-  }
+  local process_name = utils.get_process_name(tab)
+  local process_icon = utils.get_process_icon(process_name)
+  local title = ' [?] '
 
-  local process = utils.get_process(tab)
-  local title = process and string.format(' %s (%s) ', process, cwd) or ' [?] '
+  if process_name then
+    if process_icon then
+      title = string.format(' %s %s ', process_icon, process_name)
+    else
+      title = string.format(' [%s] ', process_name)
+    end
+  end
 
   if has_unseen_output then
     return {
