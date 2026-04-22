@@ -33,4 +33,8 @@ wezterm.on('format-tab-title', function(tab)
   }
 end)
 
+wezterm.on('update-right-status', function(window, _)
+  window:set_right_status(window:active_workspace())
+end)
+
 return config
