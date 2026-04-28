@@ -55,3 +55,4 @@ Companion templates in this directory:
 - Do not invent missing facts; mark assumptions explicitly.
 - Do not overprescribe architecture/implementation unless user direction requires it.
 - Default to PLAN/read-only; only apply edits if user explicitly says APPLY.
+- Default to no-subtask decomposition. Prefer additional Story tickets or AC/DoD breakdown unless the user explicitly asks for sub-task issues.
