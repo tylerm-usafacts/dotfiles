@@ -247,6 +247,7 @@ return {
   -- Treesitter
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    lazy = false,
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
@@ -344,6 +345,8 @@ return {
       ts_install.ts_generate_args = { 'generate', '--abi', vim.treesitter.language_version }
 
       local query = require 'vim.treesitter.query'
+      local tsquery = require 'nvim-treesitter.query'
+      local tsrange = require 'nvim-treesitter.tsrange'
       local directive_opts = vim.fn.has 'nvim-0.10' == 1 and { force = true, all = false } or true
       local injection_aliases = {
         ex = 'elixir',
@@ -357,6 +360,59 @@ return {
           return node[1]
         end
         return node
+      end
+
+      local original_from_nodes = tsrange.TSRange.from_nodes
+      tsrange.TSRange.from_nodes = function(buf, start_node, end_node)
+        local normalize_node = function(node)
+          if type(node) == 'table' then
+            node = node[1]
+          end
+          return node
+        end
+
+        local is_node = function(node)
+          return type(node) == 'userdata' and type(node.start) == 'function' and type(node.end_) == 'function'
+        end
+
+        start_node = normalize_node(start_node)
+        end_node = normalize_node(end_node)
+
+        if not is_node(start_node) then
+          start_node = nil
+        end
+        if not is_node(end_node) then
+          end_node = nil
+        end
+
+        if not start_node and not end_node then
+          return nil
+        end
+        return original_from_nodes(buf, start_node or end_node, end_node or start_node)
+      end
+
+      local original_get_capture_matches_recursively = tsquery.get_capture_matches_recursively
+      tsquery.get_capture_matches_recursively = function(bufnr, capture_or_fn, query_type)
+        local matches = original_get_capture_matches_recursively(bufnr, capture_or_fn, query_type)
+        if type(matches) ~= 'table' then
+          return matches
+        end
+
+        local normalized_matches = {}
+        for _, match in ipairs(matches) do
+          if type(match) == 'table' then
+            local node = match.node
+            if type(node) == 'table' then
+              node = node[1]
+            end
+            if type(node) == 'userdata' and type(node.range) == 'function' then
+              match.node = node
+              table.insert(normalized_matches, match)
+            end
+          end
+        end
+
+        return normalized_matches
       end
 
       query.add_directive('set-lang-from-info-string!', function(match, _, bufnr, pred, metadata)
