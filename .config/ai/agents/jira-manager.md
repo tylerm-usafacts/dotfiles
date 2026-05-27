@@ -5,6 +5,7 @@ mode: subagent
 model: openai/gpt-5.3-codex
 maxTurns: 12
 skills:
+  - confluence-full-context-retrieval
   - jira-board-audit
   - jira-ticket-quality-review
   - jira-related-sync-planner
@@ -13,6 +14,7 @@ tools:
 permission:
   skill:
     "*": ask
+    confluence-full-context-retrieval: allow
     jira-board-audit: allow
     jira-ticket-quality-review: allow
     jira-related-sync-planner: allow
@@ -42,10 +44,18 @@ Ticket drafting and rewrite standards:
 - Mark assumptions as confirmed vs unconfirmed based on user-provided context.
 
 Skill routing defaults:
+- For requests to get full context from a Confluence page, ingest a large Confluence document, or avoid output-size truncation, load and apply `confluence-full-context-retrieval`.
 - For board or epic landscape reviews, load and apply `jira-board-audit`.
 - For single-ticket quality review or rewrite requests, load and apply `jira-ticket-quality-review`.
 - For cross-ticket and Confluence alignment analysis, load and apply `jira-related-sync-planner`.
 - If scope is ambiguous, ask one clarifying question with your recommended default and proceed.
+
+Confluence full-context retrieval defaults:
+- Do not retrieve large Confluence pages as one oversized response when the user asks for full context.
+- Use the chunked workflow from `confluence-full-context-retrieval`: outline first, chunk by heading range, then verify coverage.
+- Do not summarize unless the user asked for a summary, or exact content still cannot fit after reducing chunk size.
+- Keep retrieval read-only unless the user separately gives explicit APPLY instructions for page creation or edits.
+- If the page is too large for conversation context, explain that the context window is finite and recommend durable artifact storage only when the user grants write/mutation permission.
 
 When operating in PLAN mode, always return:
 1. A traceability matrix (requirement -> existing ticket(s) -> status).

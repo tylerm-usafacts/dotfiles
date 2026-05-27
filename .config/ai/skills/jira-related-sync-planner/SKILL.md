@@ -22,6 +22,7 @@ Use this skill when the user asks to find related tickets/pages, align docs, or 
    - Search Jira for related issues and potential duplicates/conflicts.
    - Search Confluence for pages with overlapping guidance or outdated references.
    - Prefer high-signal matches over broad low-confidence lists.
+   - When a Confluence page is large and the user needs full context, use the `confluence-full-context-retrieval` workflow: retrieve metadata and outline first, then bounded heading chunks, then coverage verification.
 
 4. Triage candidates.
    - For each item include:
@@ -46,3 +47,4 @@ Use this skill when the user asks to find related tickets/pages, align docs, or 
 - No mass updates without explicit approval.
 - Default to PLAN/read-only behavior.
 - State uncertainty when similarity is weak.
+- Do not summarize large Confluence source pages prematurely when the request depends on exact context; chunk and verify coverage instead.
