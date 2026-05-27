@@ -20,6 +20,7 @@ Preserve exact page context across output-size limits by retrieving the page in 
 - If summary is unavoidable after reducing chunk size, label it clearly as a summary and identify the exact-content boundary that could not be returned.
 - Keep Jira/Confluence mutation workflows separate from retrieval workflows.
 - The conversation context window is finite. For very large documents, recommend durable artifact storage only when the user grants explicit write/mutation permission.
+- For Confluence edit requests, use this skill only for safe retrieval, then hand off to `confluence-local-draft-editing` for local draft creation, diff review, and write-back approval.
 
 ## Workflow
 
@@ -159,3 +160,4 @@ For full-context retrieval tasks, return:
 - Do not claim full context was retrieved until coverage verification passes.
 - Do not treat a faithful summary as exact source content.
 - Do not mix page-edit instructions into retrieval chunks unless the user separately requested APPLY.
+- Do not write edits back to Confluence from retrieval mode; use the local draft editing workflow first.

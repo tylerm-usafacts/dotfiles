@@ -59,6 +59,21 @@ Current focused setup:
 - References: `docs/references/core-principles.md`, `docs/references/language-patterns.md`, `docs/references/ai-config-field-reference.md`, `docs/references/package-installer-conventions.md`, `docs/references/mcp-config-reference.md`, `docs/references/mcp-dsl-mapping.md`
 - Runbooks: `docs/runbooks/sync-and-bootstrap.md`, `docs/runbooks/mcp-troubleshooting.md`
 
+## Atlassian agent stack
+
+- Agent: `agents/confluence-manager.md` for Confluence design-document retrieval, local draft editing, Neovim diff review, and approved page write-back.
+- Agent: `agents/jira-manager.md` for Jira ticket refinement, board audits, traceability, and issue linkage planning.
+- Confluence skills: `skills/confluence-full-context-retrieval`, `skills/confluence-local-draft-editing`
+- Jira skills: `skills/jira-board-audit`, `skills/jira-ticket-quality-review`, `skills/jira-related-sync-planner`
+- Local Confluence draft workspace: `~/confluence-docs` as a local-only Git repo.
+
+Confluence write-back policy:
+
+- Edit Confluence pages locally in `~/confluence-docs` before remote mutation.
+- Review diffs with `nvim -d source.md draft.md` by default.
+- Only the exact case-sensitive phrase `APPLY` authorizes remote Confluence mutation.
+- If a full updated page body cannot be reconstructed safely, do not mutate Confluence.
+
 Usage guidance:
 
 - Keep root `AGENTS.md` minimal and stable; place broad guardrails in `docs/policies/`.
