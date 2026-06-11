@@ -3,6 +3,9 @@ return {
     'folke/snacks.nvim',
     priority = 1000,
     lazy = false,
+    dependencies = {
+      { 'echasnovski/mini.icons', opts = {} },
+    },
     opts = {
       styles = {
         float = {

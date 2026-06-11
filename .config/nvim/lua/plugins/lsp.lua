@@ -258,6 +258,7 @@ return {
         'c',
         'diff',
         'html',
+        'hcl',
         'lua',
         'luadoc',
         'markdown',
@@ -268,6 +269,7 @@ return {
         'vimdoc',
         'python',
         'regex',
+        'terraform',
         'toml',
       },
       -- Autoinstall languages that are not installed
