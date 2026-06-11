@@ -217,6 +217,7 @@ build_opencode_json() {
         "description",
         "mode",
         "model",
+        "variant",
         "temperature",
         "top_p",
         "steps",

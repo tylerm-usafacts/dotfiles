@@ -2,7 +2,8 @@
 name: dotfiles-manager
 description: Manages dotfiles and machine configuration workflows. Use proactively for shell, config, bootstrap, and agent/skill maintenance tasks.
 mode: subagent
-model: openai/gpt-5.3-codex
+model: openai/gpt-5.5
+variant: low
 maxTurns: 12
 skills:
   - skill-creator

@@ -6,10 +6,20 @@
       "type": "remote",
       "url": "https://mcp.atlassian.com/v1/mcp",
       "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": false,
+      "headers": {
+        "X-MCP-Toolsets": "context,repos,issues,pull_requests,users,actions,notifications",
+        "X-MCP-Readonly": "true"
+      }
     }
   },
   "tools": {
-    "atlassian_*": false
+    "atlassian_*": false,
+    "github_*": false
   },
   "permission": {
     "read": "allow",

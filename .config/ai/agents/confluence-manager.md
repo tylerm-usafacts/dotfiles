@@ -2,7 +2,8 @@
 name: confluence-manager
 description: Confluence design documentation editor for local Markdown draft workflows, diff review, and approved APPLY write-back via Atlassian MCP.
 mode: subagent
-model: openai/gpt-5.3-codex
+model: openai/gpt-5.5
+variant: low
 maxTurns: 16
 skills:
   - confluence-full-context-retrieval

@@ -74,6 +74,23 @@ Confluence write-back policy:
 - Only the exact case-sensitive phrase `APPLY` authorizes remote Confluence mutation.
 - If a full updated page body cannot be reconstructed safely, do not mutate Confluence.
 
+## GitHub agent stack
+
+- Agent: `agents/github-manager.md` for draft-only GitHub pull request, issue, review, comment, check, workflow, notification, and repository engagement.
+- Skill: `skills/github-artifact-engagement`
+- MCP server: official GitHub remote MCP at `https://api.githubcopilot.com/mcp/` with OAuth and read-only mode.
+- Enabled GitHub toolsets: `context`, `repos`, `issues`, `pull_requests`, `users`, `actions`, `notifications`.
+
+GitHub engagement policy:
+
+- Initial mode is draft-only/read-only.
+- The MCP server is configured with `X-MCP-Readonly: true`.
+- OpenCode currently leaves the GitHub MCP entry disabled because GitHub's hosted OAuth endpoint does not support dynamic client registration and no static client ID is configured.
+- Use read-only `gh` CLI fallback until OpenCode remote OAuth compatibility is available or a PAT/local fallback is intentionally configured.
+- The agent drafts comments, reviews, issue replies, triage notes, and action recommendations for manual posting.
+- `APPLY` does not authorize GitHub mutation in this first version.
+- Future expansion can remove read-only MCP mode and add stricter per-operation approval rules.
+
 Usage guidance:
 
 - Keep root `AGENTS.md` minimal and stable; place broad guardrails in `docs/policies/`.

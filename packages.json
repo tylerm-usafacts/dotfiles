@@ -8,6 +8,13 @@
       }
     },
     {
+      "name": "bash",
+      "installer": {
+        "macos": { "type": "brew" },
+        "linux": { "type": "apt" }
+      }
+    },
+    {
       "name": "fzf",
       "installer": {
         "macos": { "type": "brew" },
