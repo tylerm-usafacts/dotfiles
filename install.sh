@@ -313,6 +313,11 @@ install_macos_gh_dash() {
     install_gh_dash
 }
 
+install_macos_tflint() {
+    command -v tflint &>/dev/null && return
+    brew install --cask terraform-linters/tap/tflint
+}
+
 # ─── Linux ───────────────────────────────────────────────────────────────────
 
 # Per-tool install functions for packages that need custom install on Linux.
