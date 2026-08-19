@@ -279,6 +279,20 @@ install_gh_dash() {
     gh extension install dlvhdr/gh-dash
 }
 
+install_gh_stack() {
+    if ! command -v gh &>/dev/null; then
+        echo "gh-stack install requires gh"
+        return 1
+    fi
+
+    if gh extension list | grep -qE '(^|[[:space:]])github/gh-stack([[:space:]]|$)'; then
+        return 0
+    fi
+
+    echo "Installing gh-stack..."
+    gh extension install github/gh-stack
+}
+
 # ─── macOS ───────────────────────────────────────────────────────────────────
 
 install_macos() {
@@ -311,6 +325,10 @@ install_macos() {
 
 install_macos_gh_dash() {
     install_gh_dash
+}
+
+install_macos_gh_stack() {
+    install_gh_stack
 }
 
 install_macos_tflint() {
@@ -437,6 +455,10 @@ install_linux_starship() {
 
 install_linux_gh_dash() {
     install_gh_dash
+}
+
+install_linux_gh_stack() {
+    install_gh_stack
 }
 
 is_container_runtime() {

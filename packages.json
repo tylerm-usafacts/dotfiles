@@ -98,6 +98,19 @@
       }
     },
     {
+      "name": "gh-stack",
+      "installer": {
+        "macos": {
+          "type": "custom",
+          "function": "install_macos_gh_stack"
+        },
+        "linux": {
+          "type": "custom",
+          "function": "install_linux_gh_stack"
+        }
+      }
+    },
+    {
       "name": "jq",
       "installer": {
         "macos": {
