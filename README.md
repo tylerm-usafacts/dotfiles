@@ -37,7 +37,7 @@ The script detects your OS and handles everything automatically:
 │   │   ├── opencode.json      # Settings and permissions
 │   │   ├── AGENTS.md          # -> ../ai/AGENTS.md (symlink)
 │   │   ├── skills             # -> ../ai/skills (symlink)
-│   │   └── agents/            # Generated from ../ai/agents via sync-ai-config
+│   │   └── agents/            # Runtime-generated from ../ai/agents via sync-ai-config
 │   ├── git/                   # Global git config (includes global gitignore)
 │   ├── gh/                    # GitHub CLI config
 │   ├── nvim/                  # Neovim configuration
@@ -115,10 +115,11 @@ Sync lifecycle:
 - `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
 - `sync-ai-config` depends on `yq` and `jq`.
 
-Cost-control defaults:
+Model strategy:
 
-- Planning agent uses `openai/gpt-5.3-codex` for deep planning.
-- Execution/review agents default to `openai/gpt-5.1-codex-mini`.
+- OpenCode's default primary/orchestrator model is `openai/gpt-5.6-terra`.
+- Decisionmaking or mutation-capable subagents use `openai/gpt-5.6-terra` with low reasoning effort.
+- Draft-only/read-only subagents can use cheaper models; `github-manager` uses `openai/gpt-5.6-luna`.
 - Turn budgets are kept lower for executor agents to reduce token burn.
 
 For agent authoring rules, supported frontmatter, and troubleshooting, see `.config/ai/README.md`.

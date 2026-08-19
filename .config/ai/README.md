@@ -55,6 +55,7 @@ Classification:
 Current focused setup:
 
 - Agent: `agents/dotfiles-manager.md`
+- Model: `openai/gpt-5.6-terra` for package/config changes, sync repair, and skill authoring.
 - Skills: `skills/skill-creator`, `skills/package-onboarding`, `skills/sync-repair`
 - References: `docs/references/core-principles.md`, `docs/references/language-patterns.md`, `docs/references/ai-config-field-reference.md`, `docs/references/package-installer-conventions.md`, `docs/references/mcp-config-reference.md`, `docs/references/mcp-dsl-mapping.md`
 - Runbooks: `docs/runbooks/sync-and-bootstrap.md`, `docs/runbooks/mcp-troubleshooting.md`
@@ -63,6 +64,7 @@ Current focused setup:
 
 - Agent: `agents/confluence-manager.md` for Confluence design-document retrieval, local draft editing, Neovim diff review, and approved page write-back.
 - Agent: `agents/jira-manager.md` for Jira ticket refinement, board audits, traceability, and issue linkage planning.
+- Models: both agents use `openai/gpt-5.6-terra` because they perform delegated planning and may execute approved Jira/Confluence mutations.
 - Confluence skills: `skills/confluence-full-context-retrieval`, `skills/confluence-local-draft-editing`
 - Jira skills: `skills/jira-board-audit`, `skills/jira-ticket-quality-review`, `skills/jira-related-sync-planner`
 - Local Confluence draft workspace: `~/confluence-docs` as a local-only Git repo.
@@ -77,6 +79,7 @@ Confluence write-back policy:
 ## GitHub agent stack
 
 - Agent: `agents/github-manager.md` for draft-only GitHub pull request, issue, review, comment, check, workflow, notification, and repository engagement.
+- Model: `openai/gpt-5.6-luna` because this agent is draft-only/read-only and does not perform GitHub mutations.
 - Skill: `skills/github-artifact-engagement`
 - MCP server: official GitHub remote MCP at `https://api.githubcopilot.com/mcp/` with OAuth and read-only mode.
 - Enabled GitHub toolsets: `context`, `repos`, `issues`, `pull_requests`, `users`, `actions`, `notifications`.
@@ -104,6 +107,8 @@ Usage guidance:
 - Use YAML frontmatter followed by a markdown prompt body
 - Required frontmatter keys: `name`, `description`
 - Prefer `mode: subagent` for specialist helpers
+- Use `openai/gpt-5.6-terra` for agents that make delegated planning decisions or can edit/mutate state after approval.
+- Use `openai/gpt-5.6-luna` only for narrow, read-only, or draft-only agents where mistakes are easy to inspect before action.
 
 Canonical example:
 
@@ -112,7 +117,7 @@ Canonical example:
 name: code-reviewer
 description: Reviews code for security and maintainability
 mode: subagent
-model: openai/gpt-5.1-codex-mini
+model: openai/gpt-5.6-luna
 maxTurns: 8
 permission:
   edit: deny

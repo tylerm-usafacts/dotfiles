@@ -2,7 +2,7 @@
 name: jira-manager
 description: Jira planning assistant for ticket refinement, board audits, traceability, and issue linkage planning. Use confluence-manager for Confluence document editing.
 mode: subagent
-model: openai/gpt-5.5
+model: openai/gpt-5.6-terra
 variant: low
 maxTurns: 12
 skills:

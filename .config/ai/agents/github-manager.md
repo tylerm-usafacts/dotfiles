@@ -2,7 +2,7 @@
 name: github-manager
 description: Draft-only GitHub artifact assistant for pull requests, issues, reviews, comments, checks, workflow runs, notifications, and repository context.
 mode: subagent
-model: openai/gpt-5.5
+model: openai/gpt-5.6-luna
 variant: low
 maxTurns: 14
 skills:
