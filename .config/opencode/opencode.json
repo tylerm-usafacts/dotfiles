@@ -7,6 +7,11 @@
       "url": "https://mcp.atlassian.com/v1/mcp",
       "enabled": true
     },
+    "datadog": {
+      "type": "remote",
+      "url": "https://mcp.us5.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core",
+      "enabled": true
+    },
     "github": {
       "type": "remote",
       "url": "https://api.githubcopilot.com/mcp/",
@@ -21,6 +26,7 @@
   },
   "tools": {
     "atlassian_*": false,
+    "datadog_*": false,
     "github_*": false
   },
   "permission": {

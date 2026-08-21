@@ -94,6 +94,21 @@ GitHub engagement policy:
 - `APPLY` does not authorize GitHub mutation in this first version.
 - Future expansion can remove read-only MCP mode and add stricter per-operation approval rules.
 
+## Datadog agent stack
+
+- Agent: `agents/datadog-manager.md` for focused Datadog diagnostics and operational recommendations.
+- Model: `openai/gpt-5.6-luna` because this agent is diagnostic and read-only by default.
+- MCP server: Datadog US5 remote MCP at `https://mcp.us5.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core`.
+- Authentication: OpenCode-managed OAuth; no Datadog credentials are stored in the repository or `secrets.env`.
+- Enabled server toolsets: `core` only. Datadog tools are disabled globally and enabled only for `datadog-manager`.
+
+Datadog operation policy:
+
+- The server uses automatic OAuth discovery. If authentication does not start automatically, run `opencode mcp auth datadog`.
+- If the Datadog organization requires an OAuth redirect allow-list, add `http://127.0.0.1:19876/mcp/oauth/callback` in Organization Preferences.
+- Keep the `core` toolset until additional product-specific tools are required; add named `toolsets` URL query values deliberately and restart OpenCode after changing them.
+- The agent is diagnostic and read-only by default. It must not mutate Datadog resources without explicit user authorization.
+
 Usage guidance:
 
 - Keep root `AGENTS.md` minimal and stable; place broad guardrails in `docs/policies/`.
