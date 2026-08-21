@@ -331,7 +331,7 @@ build_claude_mcp_json() {
     | with_entries(
         .value = (
           .value
-          | del(.enabled)
+          | del(.enabled, .oauth)
           | if (.type == "stdio" and (.command | type) == "array") then
               {
                 type: "stdio",
@@ -342,6 +342,13 @@ build_claude_mcp_json() {
             else
               .
             end
+          | walk(
+              if type == "string" then
+                gsub("\\{env:(?<name>[A-Za-z_][A-Za-z0-9_]*)\\}"; "${\(.name)}")
+              else
+                .
+              end
+            )
         )
       )
     | { mcpServers: . }

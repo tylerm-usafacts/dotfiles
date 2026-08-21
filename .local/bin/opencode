@@ -5,6 +5,11 @@ set -euo pipefail
 script_dir=${0:A:h}
 "$script_dir/sync-ai-config"
 
+secrets_file="$HOME/.config/ai/secrets.env"
+if [[ -f "$secrets_file" ]]; then
+  source "$secrets_file"
+fi
+
 self_path=${0:A}
 real_binary=""
 

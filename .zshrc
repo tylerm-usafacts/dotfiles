@@ -38,7 +38,3 @@ alias lg="lazygit"
 alias oc="opencode"
 alias zrc="source ~/.zshrc"
 alias cd="z"
-
-
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"

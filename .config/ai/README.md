@@ -81,15 +81,15 @@ Confluence write-back policy:
 - Agent: `agents/github-manager.md` for draft-only GitHub pull request, issue, review, comment, check, workflow, notification, and repository engagement.
 - Model: `openai/gpt-5.6-luna` because this agent is draft-only/read-only and does not perform GitHub mutations.
 - Skill: `skills/github-artifact-engagement`
-- MCP server: official GitHub remote MCP at `https://api.githubcopilot.com/mcp/` with OAuth and read-only mode.
+- MCP server: official GitHub remote MCP at `https://api.githubcopilot.com/mcp/` with a fine-grained PAT and read-only mode.
 - Enabled GitHub toolsets: `context`, `repos`, `issues`, `pull_requests`, `users`, `actions`, `notifications`.
 
 GitHub engagement policy:
 
 - Initial mode is draft-only/read-only.
 - The MCP server is configured with `X-MCP-Readonly: true`.
-- OpenCode currently leaves the GitHub MCP entry disabled because GitHub's hosted OAuth endpoint does not support dynamic client registration and no static client ID is configured.
-- Use read-only `gh` CLI fallback until OpenCode remote OAuth compatibility is available or a PAT/local fallback is intentionally configured.
+- The GitHub MCP entry uses `GITHUB_PERSONAL_ACCESS_TOKEN` from `~/.config/ai/secrets.env`; the token is not committed or rendered into runtime config.
+- OpenCode remote OAuth is not supported by GitHub's hosted endpoint; use a fine-grained, repository-limited, read-only PAT instead.
 - The agent drafts comments, reviews, issue replies, triage notes, and action recommendations for manual posting.
 - `APPLY` does not authorize GitHub mutation in this first version.
 - Future expansion can remove read-only MCP mode and add stricter per-operation approval rules.
@@ -143,7 +143,7 @@ MCP sync behavior:
 - Canonical MCP source: `.config/ai/mcp/servers.json`
 - OpenCode target: `~/.config/opencode/opencode.json` (`mcp` block)
 - Claude target: `~/dotfiles/.mcp.json` (`mcpServers`)
-- OAuth credentials and auth caches remain runtime state and are not source files.
+- Secrets are loaded by the tracked `claude` and `opencode` wrappers from the local-only `~/.config/ai/secrets.env` file.
 - Mapping reference: `.config/ai/docs/references/mcp-dsl-mapping.md`
 
 Sync output locations:

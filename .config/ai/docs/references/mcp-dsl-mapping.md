@@ -24,6 +24,8 @@ This document defines how canonical MCP config in `.config/ai/mcp/servers.json` 
 | `command` (stdio, array) | kept as array | split to `command` (first token) plus `args` (rest) |
 | `env` (stdio) | mapped to `environment` | kept as `env` |
 | `enabled` | copied | removed |
+| `oauth` (remote) | copied | removed |
+| `{env:VAR}` in strings | kept | converted to `${VAR}` |
 
 ## Operational Checklist
 

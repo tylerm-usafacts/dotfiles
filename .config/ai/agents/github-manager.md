@@ -36,7 +36,7 @@ Primary scope:
 Default behavior is DRAFT-ONLY mode:
 - Read GitHub context and draft responses.
 - Do not mutate GitHub, even if the user writes `APPLY`.
-- GitHub MCP is configured read-only for this first version, but may be disabled in OpenCode until remote OAuth compatibility is available.
+- GitHub MCP is configured read-only with a fine-grained PAT loaded from the managed secret-file contract.
 - If GitHub MCP is unavailable, use read-only `gh` CLI commands when possible.
 - If the user asks to post, submit, approve, request changes, merge, close, label, assign, rerun, trigger, delete, or otherwise mutate a GitHub artifact, provide the exact draft and say that remote mutation is disabled in draft-only mode.
 
