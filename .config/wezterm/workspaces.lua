@@ -33,11 +33,6 @@ local function apply_dev_layout(mux_window, cwd)
   end
 
   top_pane:send_text 'nvim\n'
-  top_pane:split {
-    direction = 'Right',
-    size = 0.30,
-    cwd = cwd,
-  }
 
   local _, left_pane = mux_window:spawn_tab {
     cwd = cwd,
@@ -56,6 +51,13 @@ local function apply_dev_layout(mux_window, cwd)
 
   if right_pane then
     right_pane:send_text 'lazygit\n'
+  end
+
+  local _, gh_dash_pane = mux_window:spawn_tab {
+    cwd = cwd,
+  }
+  if gh_dash_pane then
+    gh_dash_pane:send_text 'gh dash\n'
   end
 end
 

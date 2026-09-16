@@ -1,10 +1,11 @@
+# yaml-language-server: $schema=https://gh-dash.dev/schema.json
 prSections:
     - title: My Pull Requests
       filters: is:open author:@me
-    - title: Needs My Review
-      filters: is:open review-requested:@me
+    - title: Needs Review
+      filters: is:open review-requested:@me -is:draft
     - title: Involved
-      filters: is:open involves:@me -author:@me
+      filters: is:open reviewed-by:@me -author:@me
 issuesSections:
     - title: My Issues
       filters: is:open author:@me
@@ -13,6 +14,8 @@ issuesSections:
     - title: Involved
       filters: is:open involves:@me -author:@me
 notificationsSections:
+    - title: Review Follow-up
+      filters: is:unread reason:participating
     - title: All
       filters: ""
     - title: Created
@@ -76,14 +79,33 @@ defaults:
                 width: 20
                 hidden: true
     refetchIntervalMinutes: 30
-keybindings: {}
+keybindings:
+    prs:
+        - key: ctrl+g
+          name: review in tuicr
+          command: tuicr pr {{.RepoName}}#{{.PrNumber}}
 repoPaths: {}
 theme:
     ui:
         sectionsShowCount: true
         table:
-            showSeparator: true
+            showSeparators: true
             compact: false
+    colors:
+        text:
+            primary: "#cad3f5"
+            secondary: "#cad3f5"
+            inverted: "#24273a"
+            faint: "#939ab7"
+            warning: "#ed8796"
+            success: "#a6da95"
+            actor: "#b8c0e0"
+        background:
+            selected: "#494d64"
+        border:
+            primary: "#8aadf4"
+            secondary: "#5b6078"
+            faint: "#494d64"
     pager:
     diff: ""
 confirmQuit: false

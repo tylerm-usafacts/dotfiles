@@ -38,13 +38,13 @@
       "installer": {
         "macos": {
           "type": "native",
-          "detect": "test -d \"$HOME/.local/share/claude/versions\"",
+          "detect": "command -v claude >/dev/null 2>&1",
           "install": "curl -fsSL https://claude.ai/install.sh | bash",
           "upgrade": "claude upgrade"
         },
         "linux": {
           "type": "native",
-          "detect": "test -d \"$HOME/.local/share/claude/versions\"",
+          "detect": "command -v claude >/dev/null 2>&1",
           "install": "curl -fsSL https://claude.ai/install.sh | bash",
           "upgrade": "claude upgrade"
         }
@@ -311,6 +311,17 @@
         "linux": {
           "type": "custom",
           "function": "install_linux_tree_sitter"
+        }
+      }
+    },
+    {
+      "name": "tuicr",
+      "installer": {
+        "macos": {
+          "type": "brew"
+        },
+        "linux": {
+          "type": "apt"
         }
       }
     },

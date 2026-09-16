@@ -175,15 +175,26 @@ upgrade_package() {
             install_cmd=$(package_installer_field "$pkg" install)
             detect_cmd=$(package_installer_field "$pkg" detect)
 
+            if [[ -z "$install_cmd" || -z "$detect_cmd" ]]; then
+                echo "native installer for $pkg requires install and detect"
+                return 1
+            fi
+
+            if ! bash -lc "$detect_cmd"; then
+                echo "${pkg} is not detected; falling back to install command..."
+                bash -lc "$install_cmd"
+
+                if ! bash -lc "$detect_cmd"; then
+                    echo "Native install fallback failed for ${pkg}"
+                    return 1
+                fi
+                return
+            fi
+
             if [[ -n "$upgrade_cmd" ]]; then
                 echo "Upgrading ${pkg} via native upgrade command..."
                 bash -lc "$upgrade_cmd"
                 return
-            fi
-
-            if [[ -z "$install_cmd" || -z "$detect_cmd" ]]; then
-                echo "native installer for $pkg requires install and detect"
-                return 1
             fi
 
             echo "No native upgrade command for ${pkg}; falling back to install command..."
@@ -312,7 +323,7 @@ install_macos() {
         echo "Upgrading managed packages via Homebrew..."
     fi
 
-    while IFS= read -r pkg; do
+    while IFS= read -r pkg <&3; do
         [[ -z "$pkg" ]] && continue
         if [[ "$MODE" == "install" ]]; then
             is_core_dependency "$pkg" && continue
@@ -320,7 +331,7 @@ install_macos() {
         else
             upgrade_package "$pkg"
         fi
-    done < <(package_names)
+    done 3< <(package_names)
 }
 
 install_macos_gh_dash() {
@@ -665,10 +676,10 @@ install_linux() {
 
     if [[ "$MODE" == "upgrade" ]]; then
         echo "Upgrading managed packages on Linux..."
-        while IFS= read -r pkg; do
+        while IFS= read -r pkg <&3; do
             [[ -z "$pkg" ]] && continue
             upgrade_package "$pkg"
-        done < <(package_names)
+        done 3< <(package_names)
         return
     fi
 
@@ -689,11 +700,11 @@ install_linux() {
     install_linux_yq
 
     # Install each package from declarative installer config
-    while IFS= read -r pkg; do
+    while IFS= read -r pkg <&3; do
         [[ -z "$pkg" ]] && continue
         is_core_dependency "$pkg" && continue
         install_package "$pkg"
-    done < <(package_names)
+    done 3< <(package_names)
 
     # Set zsh as default shell
     if [[ "$SHELL" != "$(which zsh)" ]]; then
