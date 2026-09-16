@@ -30,14 +30,14 @@ function M.setup()
 
   local function copy_with_limit(register)
     local copy = osc52.copy(register)
-    return function(lines, regtype)
+    return function(lines)
       local text = table.concat(lines, '\n')
       if #text > max_copy_bytes then
         vim.notify('Skipping OSC52 copy: selection too large', vim.log.levels.WARN)
         return
       end
 
-      copy(lines, regtype)
+      copy(lines)
     end
   end
 

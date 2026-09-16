@@ -102,7 +102,7 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = 'qf',
   callback = function()
     -- Do not show quickfix in buffer lists.
-    vim.api.nvim_buf_set_option(0, 'buflisted', false)
+    vim.bo[0].buflisted = false
 
     -- Escape closes quickfix window.
     vim.keymap.set('n', '<ESC>', '<CMD>cclose<CR>', { buffer = true, remap = false, silent = true })
