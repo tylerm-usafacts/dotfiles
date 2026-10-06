@@ -28,7 +28,17 @@
     "opus"
   ],
   "enabledPlugins": {
-    "pyright-lsp@claude-plugins-official": true
+    "pyright-lsp@claude-plugins-official": true,
+    "usafacts-core@usafacts": true,
+    "usafacts-dev@usafacts": true
+  },
+  "extraKnownMarketplaces": {
+    "usafacts": {
+      "source": {
+        "source": "github",
+        "repo": "USAFacts/claude-plugins"
+      }
+    }
   },
   "effortLevel": "medium"
 }

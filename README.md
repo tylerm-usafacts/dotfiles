@@ -32,6 +32,7 @@ The script detects your OS and handles everything automatically:
 │   │   ├── AGENTS.md          # Instructions used by both Claude Code and OpenCode
 │   │   ├── skills/            # Shared skills (both systems pick these up)
 │   │   ├── agents/            # Shared custom agent definitions (single source)
+│   │   ├── plugins.json       # Adopted upstream skill sources for OpenCode
 │   │   └── mcp/               # Shared MCP server definitions (single source)
 │   ├── opencode/              # OpenCode configuration
 │   │   ├── opencode.json      # Settings and permissions
@@ -102,6 +103,7 @@ AI instructions, skills, and custom agents use `.config/ai/` as the source of tr
 - Shared custom agents: `.config/ai/agents/*.md` (canonical YAML frontmatter + markdown prompt)
 - Shared documentation: `.config/ai/docs/` (`policies/`, `runbooks/`, `references/`)
 - Shared MCP server definitions: `.config/ai/mcp/servers.json`
+- USAFacts skill adoption list: `.config/ai/plugins.json` (OpenCode only; Claude uses official plugin activation)
 
 Sync lifecycle:
 
@@ -113,6 +115,7 @@ Sync lifecycle:
   - `~/dotfiles/.mcp.json` (`mcpServers` for Claude project scope)
 - MCP DSL mapping reference: `.config/ai/docs/references/mcp-dsl-mapping.md`
 - `claude` and `opencode` wrappers run `sync-ai-config` before launch and fail fast if sync fails.
+- `sync-ai-config` fast-forwards the managed USAFacts runtime checkout and exposes only manifest-adopted skills to OpenCode.
 - `sync-ai-config` depends on `yq` and `jq`.
 
 Model strategy:

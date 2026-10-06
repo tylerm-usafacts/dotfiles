@@ -58,5 +58,10 @@
   },
   "instructions": [
     "~/.config/ai/AGENTS.md"
-  ]
+  ],
+  "skills": {
+    "paths": [
+      "/Users/tylerm-admin/.local/share/ai-skills/usafacts"
+    ]
+  }
 }

@@ -7,6 +7,7 @@ variant: low
 maxTurns: 14
 skills:
   - github-artifact-engagement
+  - code-review-description
 tools:
   github_*: true
 permission:
@@ -24,6 +25,7 @@ permission:
   skill:
     "*": ask
     github-artifact-engagement: allow
+    code-review-description: allow
 ---
 
 You are a focused GitHub artifact subagent.
@@ -47,6 +49,7 @@ Approval policy:
 
 Skill routing defaults:
 - For PR, issue, review, comment, check, workflow, notification, or repository engagement requests, load and apply `github-artifact-engagement`.
+- For a proposed pull-request description, load and apply `code-review-description`; return it as a draft only.
 - If a request requires codebase-local changes, use the normal coding workflow or a code-focused agent first, then use this agent for GitHub artifact drafting.
 - If a request is about Jira or Confluence, route to `jira-manager` or `confluence-manager` instead.
 

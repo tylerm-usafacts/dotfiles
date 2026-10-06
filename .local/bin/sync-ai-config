@@ -21,11 +21,150 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command '$1'"
 }
 
+acquire_lock() {
+  local lock_dir="$1"
+  local attempt
+
+  mkdir -p "$(dirname "$lock_dir")"
+  for attempt in {1..300}; do
+    if mkdir "$lock_dir" 2>/dev/null; then
+      return
+    fi
+    sleep 0.1
+  done
+
+  fail "timed out waiting for another sync to finish"
+}
+
 read_file_if_exists() {
   local path="$1"
   if [[ -f "$path" ]]; then
     cat "$path"
   fi
+}
+
+sync_usafacts_skills() {
+  local manifest_file="$1"
+  local data_home="$2"
+
+  [[ -f "$manifest_file" ]] || return
+
+  if ! jq -e '
+    .sources.usafacts
+    | (.repository | type == "string")
+    and (.branch | type == "string")
+    and (.adopt | type == "object")
+    and ([.adopt[] | type == "array"] | all)
+  ' "$manifest_file" >/dev/null 2>&1; then
+    fail "$manifest_file: invalid USAFacts plugin source or adoption list"
+  fi
+
+  require_cmd git
+  require_cmd gh
+
+  local repository branch checkout_root curated_root
+  repository="$(jq -r '.sources.usafacts.repository' "$manifest_file")"
+  branch="$(jq -r '.sources.usafacts.branch' "$manifest_file")"
+  checkout_root="$data_home/ai-plugins/usafacts-claude-plugins"
+  curated_root="$data_home/ai-skills/usafacts"
+
+  if [[ ! -d "$checkout_root/.git" ]]; then
+    changed=1
+    if (( !check_only )); then
+      mkdir -p "$(dirname "$checkout_root")"
+      gh repo clone "$repository" "$checkout_root" -- --branch "$branch" --single-branch
+    fi
+  else
+    if ! git -C "$checkout_root" diff --quiet || ! git -C "$checkout_root" diff --cached --quiet; then
+      fail "$checkout_root: managed runtime checkout has local changes"
+    fi
+
+    if [[ "$(git -C "$checkout_root" branch --show-current)" != "$branch" ]]; then
+      fail "$checkout_root: expected branch '$branch'"
+    fi
+
+    local before_revision after_revision
+    before_revision="$(git -C "$checkout_root" rev-parse HEAD)"
+    if (( !check_only )); then
+      git -C "$checkout_root" pull --ff-only --quiet origin "$branch"
+    fi
+    after_revision="$(git -C "$checkout_root" rev-parse HEAD)"
+    if [[ "$before_revision" != "$after_revision" ]]; then
+      changed=1
+      printf 'sync-ai-config: updated USAFacts skills %s -> %s\n' "$before_revision" "$after_revision" >&2
+    fi
+  fi
+
+  if (( check_only )); then
+    local local_revision remote_revision
+    local_revision="$(git -C "$checkout_root" rev-parse HEAD)"
+    remote_revision="$(git -C "$checkout_root" ls-remote --exit-code origin "refs/heads/$branch" | cut -f1)"
+    if [[ "$local_revision" != "$remote_revision" ]]; then
+      changed=1
+    fi
+  fi
+
+  if [[ ! -d "$checkout_root" ]]; then
+    return
+  fi
+
+  local expected_file
+  expected_file="$(mktemp)"
+  local plugin skill source_skill
+  while IFS=$'\t' read -r plugin skill; do
+    source_skill="$checkout_root/plugins/$plugin/skills/$skill"
+    if [[ ! -f "$source_skill/SKILL.md" ]]; then
+      rm -f "$expected_file"
+      fail "$manifest_file: adopted skill '$plugin:$skill' is missing SKILL.md"
+    fi
+
+    if ! jq -e --arg skill "$skill" '
+      .sources.usafacts.adopt
+      | to_entries
+      | map(.value[])
+      | group_by(.)
+      | all(length == 1)
+    ' "$manifest_file" >/dev/null; then
+      rm -f "$expected_file"
+      fail "$manifest_file: adopted skill names must be unique across plugins"
+    fi
+
+    if [[ -e "$ai_root/skills/$skill" ]]; then
+      rm -f "$expected_file"
+      fail "$manifest_file: adopted skill '$skill' conflicts with local skill '$ai_root/skills/$skill'"
+    fi
+
+    printf '%s\t%s\n' "$skill" "$source_skill" >> "$expected_file"
+  done < <(jq -r '.sources.usafacts.adopt | to_entries[] | .key as $plugin | .value[] | [$plugin, .] | @tsv' "$manifest_file")
+
+  local expected_state current_state
+  expected_state="$(cat "$expected_file")"
+  current_state="$(read_file_if_exists "$curated_root/.sync-ai-config-adopted-skills")"
+  if [[ "$current_state" != "$expected_state" ]]; then
+    changed=1
+    if (( !check_only )); then
+      local staging_root
+      mkdir -p "$(dirname "$curated_root")"
+      staging_root="$(mktemp -d "${curated_root}.staging.XXXXXX")"
+      while IFS=$'\t' read -r skill source_skill; do
+        ln -s "$source_skill" "$staging_root/$skill"
+      done < "$expected_file"
+      printf '%s' "$expected_state" > "$staging_root/.sync-ai-config-adopted-skills"
+
+      if [[ -e "$curated_root" ]]; then
+        if [[ ! -f "$curated_root/.sync-ai-config-adopted-skills" ]]; then
+          rm -f "$expected_file"
+          rm -rf "$staging_root"
+          fail "$curated_root: refusing to replace unmanaged directory"
+        fi
+        rm -rf "$curated_root"
+      fi
+      mv "$staging_root" "$curated_root"
+    fi
+  fi
+  rm -f "$expected_file"
+
+  usafacts_skills_path="$curated_root"
 }
 
 resolve_path_for_compare() {
@@ -404,7 +543,14 @@ sync_mcp_configs() {
   fi
 
   local opencode_expected_json
-  opencode_expected_json="$(printf '%s' "$opencode_current_json" | jq --argjson mcp "$opencode_mcp_json" '. + { mcp: $mcp }')"
+  opencode_expected_json="$(printf '%s' "$opencode_current_json" | jq --argjson mcp "$opencode_mcp_json" --arg skills_path "$usafacts_skills_path" '
+    . + { mcp: $mcp }
+    | if $skills_path == "" then . else
+        .skills = ((.skills // {}) + {
+          paths: (((.skills.paths // []) | map(select(. != $skills_path))) + [$skills_path])
+        })
+      end
+  ')"
   opencode_expected_json="$(printf '%s' "$opencode_expected_json" | jq '.')"
   ensure_text_file "$opencode_config_file" "$opencode_expected_json"
 
@@ -436,10 +582,7 @@ if ! yq --version 2>/dev/null | grep -qi 'mikefarah'; then
 fi
 
 home="$HOME"
-ai_root="$home/.config/ai"
-source_agents_dir="$ai_root/agents"
-source_mcp_file="$ai_root/mcp/servers.json"
-
+sync_lock_dir="${XDG_RUNTIME_DIR:-$home/.local/share}/sync-ai-config.lock"
 dotfiles_root=""
 script_realpath="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$0" 2>/dev/null || true)"
 if [[ -n "$script_realpath" ]]; then
@@ -449,22 +592,35 @@ if [[ -z "$dotfiles_root" ]]; then
   dotfiles_root="$home/dotfiles"
 fi
 
+# The repository is canonical even when a stale pre-Stow copy remains in $HOME.
+ai_root="$dotfiles_root/.config/ai"
+if [[ ! -d "$ai_root" ]]; then
+  ai_root="$home/.config/ai"
+fi
+source_agents_dir="$ai_root/agents"
+source_mcp_file="$ai_root/mcp/servers.json"
+source_plugins_file="$ai_root/plugins.json"
+
+acquire_lock "$sync_lock_dir"
+
 opencode_agents_dir="$home/.config/opencode/agents"
 claude_agents_dir="$home/.claude/agents"
 opencode_config_file="$home/.config/opencode/opencode.json"
 claude_project_mcp_file="$dotfiles_root/.mcp.json"
 
 changed=0
+usafacts_skills_path=""
 
 ensure_symlink "$home/.config/opencode/AGENTS.md" "$ai_root/AGENTS.md"
 ensure_symlink "$home/.config/opencode/skills" "$ai_root/skills"
 ensure_symlink "$home/.claude/skills" "$ai_root/skills"
 ensure_symlink "$home/.claude/plugins/local/skills" "$ai_root/skills"
 ensure_text_file "$home/.claude/CLAUDE.md" "@~/.config/ai/AGENTS.md"
+sync_usafacts_skills "$source_plugins_file" "${XDG_DATA_HOME:-$home/.local/share}"
 sync_mcp_configs "$source_mcp_file" "$opencode_config_file" "$claude_project_mcp_file"
 
 tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
+trap 'rm -rf "$tmp_dir"; rmdir "$sync_lock_dir" 2>/dev/null || true' EXIT
 
 expected_claude_dir="$tmp_dir/claude"
 expected_opencode_dir="$tmp_dir/opencode"

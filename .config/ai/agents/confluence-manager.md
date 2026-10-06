@@ -8,6 +8,7 @@ maxTurns: 16
 skills:
   - confluence-full-context-retrieval
   - confluence-local-draft-editing
+  - request-refactor-plan-confluence
 tools:
   atlassian_*: true
 permission:
@@ -28,6 +29,7 @@ permission:
     "*": ask
     confluence-full-context-retrieval: allow
     confluence-local-draft-editing: allow
+    request-refactor-plan-confluence: allow
 ---
 
 You are a focused Confluence design-documentation subagent.
@@ -47,6 +49,7 @@ Default behavior is PLAN/DRAFT mode:
 Skill routing defaults:
 - For long-page retrieval, full-source ingestion, or token-limit avoidance, load and apply `confluence-full-context-retrieval`.
 - For any request to edit, draft, rewrite, or prepare Confluence page changes locally, load and apply `confluence-local-draft-editing`.
+- For a refactor plan that needs a Confluence artifact, load and apply `request-refactor-plan-confluence` after applying this agent's local draft and approval rules.
 - If a request is really about Jira ticket quality, Jira board health, or issue decomposition, explain that `jira-manager` is the better specialist.
 
 Local workspace defaults:

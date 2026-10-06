@@ -1,0 +1,32 @@
+{
+  "sources": {
+    "usafacts": {
+      "repository": "USAFacts/claude-plugins",
+      "branch": "main",
+      "adopt": {
+        "usafacts-core": [
+          "jira-ticket-review-and-sync",
+          "jira-ticket-writer"
+        ],
+        "usafacts-dev": [
+          "bug-hunter",
+          "code-review-description",
+          "diagnose",
+          "grill-with-docs",
+          "handoff",
+          "improve-codebase-architecture",
+          "oncall-issue-summary",
+          "optimize-agents-md",
+          "publish-to-mockups",
+          "request-refactor-plan-confluence",
+          "stack",
+          "test-driven-development",
+          "triage",
+          "verify-code-review-suggestion",
+          "write-a-skill",
+          "zoom-out"
+        ]
+      }
+    }
+  }
+}

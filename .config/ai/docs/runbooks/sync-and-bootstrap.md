@@ -9,6 +9,7 @@ Use this runbook for machine setup failures, AI-config drift, and sync validatio
 - Symlink conflicts or stale stow state.
 - Shell path mismatch (`~/.local/bin` not first in `PATH`).
 - Package install mismatch across macOS and Linux.
+- USAFacts runtime checkout is missing, has local changes, or cannot fast-forward from `main`.
 
 ## Triage Steps
 
@@ -24,7 +25,16 @@ Use this runbook for machine setup failures, AI-config drift, and sync validatio
    - `sync-ai-config --check`
 4. If drift remains, reconcile and re-check.
    - `sync-ai-config`
-   - `sync-ai-config --check`
+    - `sync-ai-config --check`
+
+## USAFacts Adopted Skills
+
+`sync-ai-config` maintains `~/.local/share/ai-plugins/usafacts-claude-plugins` as a runtime-only checkout of the branch selected in `.config/ai/plugins.json`. Do not use that checkout for contributions or local edits.
+
+- Use a separate contributor clone for feature branches and upstream pull requests.
+- The adoption list controls which upstream skills OpenCode discovers.
+- Claude enables the marketplace plugins as a whole and consequently discovers all skills in those plugins.
+- If sync reports a dirty managed checkout, discard only changes made in the managed runtime path, or remove that runtime checkout and rerun sync. Do not remove a contributor workspace.
 
 ## yq Variant Check
 

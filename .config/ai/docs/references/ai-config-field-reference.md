@@ -7,6 +7,7 @@ Use this reference when editing `.config/ai/agents/*.md` and validating sync beh
 - Author custom agents in `.config/ai/agents/*.md`.
 - Keep shared instructions in `.config/ai/AGENTS.md`.
 - Keep reusable procedures in `.config/ai/skills/*/SKILL.md`.
+- Keep selected USAFacts upstream skills in `.config/ai/plugins.json`; do not copy their `SKILL.md` files into this repository.
 - Run `sync-ai-config` to render tool-native outputs.
 
 ## Frontmatter Core Fields
@@ -18,6 +19,8 @@ Use this reference when editing `.config/ai/agents/*.md` and validating sync beh
 - `maxTurns`: canonical turn budget.
 - `skills`: explicit skill allowlist for the agent.
 - `permission`: command and tool policy.
+
+`skills` is rendered for Claude. OpenCode discovers skills from configured paths; use `permission.skill` and the agent prompt to constrain and route its upstream skills.
 
 ## Field Mapping Behavior
 
