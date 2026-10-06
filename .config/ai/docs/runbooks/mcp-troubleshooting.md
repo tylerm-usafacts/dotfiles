@@ -41,6 +41,13 @@ Use this runbook for MCP configuration drift, validation failures, or runtime mi
 3. If OAuth redirects are rejected by the Datadog organization, allow-list `http://127.0.0.1:19876/mcp/oauth/callback` in Datadog Organization Preferences.
 4. Confirm the authenticated role has `mcp_read` and the resource-level permissions needed for the requested data.
 
+## Fellow OAuth
+
+1. Confirm the Fellow endpoint is `https://fellow.app/mcp` in `.config/ai/mcp/servers.json` and that no static OAuth override or bearer token is configured.
+2. Run `sync-ai-config`, restart OpenCode, then run `opencode mcp auth fellow` if dynamic discovery does not open the Fellow authorization flow automatically.
+3. Complete Fellow OAuth in the browser and verify `opencode mcp list` reports the server as authenticated.
+4. Verify a read-only request against a non-sensitive meeting. If discovery or authorization fails, capture the client error and consult Fellow's MCP connection instructions before adding any local-only credential variable.
+
 ## Security Notes
 
 - Never commit OAuth tokens or auth caches.

@@ -10,6 +10,11 @@
       "url": "https://mcp.us5.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core",
       "enabled": true
     },
+    "fellow": {
+      "type": "http",
+      "url": "https://fellow.app/mcp",
+      "enabled": true
+    },
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
