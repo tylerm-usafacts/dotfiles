@@ -1,3 +1,10 @@
 theme = "catppuccin-macchiato"
 diff_view = "side-by-side"
 leader = " "
+
+comment_types = [
+  { id = "blocker", label = "BLOCKER", definition = "must be resolved before merge", color = "red" },
+  { id = "question", label = "QUESTION", definition = "needs clarification or discussion", color = "yellow" },
+  { id = "suggestion", label = "SUGGESTION", definition = "recommended improvement that is not required", color = "blue" },
+  { id = "nit", label = "NIT", definition = "minor optional polish or style feedback", color = "gray" },
+]
